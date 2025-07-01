@@ -26,6 +26,13 @@ config:
         - Verifiable success criteria
         - Scope boundaries with three mandatory sections
         
+        RESPONSE FORMAT: Provide a concise summary containing:
+        • **Problem**: One-sentence core problem statement
+        • **Users Affected**: Primary user groups and their pain points
+        • **Success Criteria**: 2-3 measurable outcomes that define completion
+        • **Scope**: Brief inScope/outOfScope/onReview boundaries
+        • **Root Cause**: Key underlying issue identified
+        
         Always validate that the problem is solvable and the scope is realistic.
 
     technicalDiscovery:
@@ -53,6 +60,13 @@ config:
         - Existing patterns and conventions documentation
         - Integration points identification
         - Technical constraints assessment
+        
+        RESPONSE FORMAT: Provide a structured summary containing:
+        • **Architecture**: Current system structure and key patterns found
+        • **Relevant Files**: 3-5 most important files/modules for this task
+        • **Dependencies**: Critical dependencies and integration points
+        • **Patterns**: Existing code patterns that should be followed
+        • **Constraints**: Key technical limitations or requirements
         
         Always validate findings against the actual codebase through systematic analysis.
 
@@ -82,6 +96,13 @@ config:
         - Validated assumptions list
         - Clear decision points resolution
         
+        RESPONSE FORMAT: Provide a focused summary containing:
+        • **Critical Questions**: 2-3 most important requirements that need clarification
+        • **Implementation Options**: Brief comparison of main approaches with pros/cons
+        • **Decisions Needed**: Specific choices that require user input
+        • **Assumptions**: Key assumptions that need validation
+        • **Gaps**: Missing information that blocks progress
+        
         Always ensure requirements are complete and implementable before proceeding.
 
     scenarioDefinition:
@@ -108,6 +129,13 @@ config:
         - Failure scenarios with expected handling
         - Edge cases with validation criteria
         
+        RESPONSE FORMAT: Provide a clear summary containing:
+        • **Success Scenarios**: 2-3 main user workflows with expected outcomes
+        • **Failure Cases**: Key error scenarios and expected handling
+        • **Edge Cases**: Critical boundary conditions to test
+        • **Testing Steps**: Manual verification procedures for each scenario
+        • **User Workflows**: Primary interaction patterns
+        
         Always ensure scenarios reflect real user needs and are testable.
 
     riskAssessment:
@@ -132,6 +160,13 @@ config:
         Key deliverables:
         - High-priority risks with mitigation strategies
         - Breaking changes requiring attention
+        
+        RESPONSE FORMAT: Provide a risk summary containing:
+        • **High-Priority Risks**: Top 2-3 risks that could impact success
+        • **Breaking Changes**: Specific compatibility issues identified
+        • **Mitigation Strategies**: Concrete approaches to reduce identified risks
+        • **Complexity Assessment**: Implementation difficulty level and key challenges
+        • **Performance Implications**: Expected impact on system performance
         
         Always provide actionable risk mitigation approaches.
 
@@ -158,6 +193,13 @@ config:
         - Selected patterns and integration approach
         - Architectural decisions with rationale
         
+        RESPONSE FORMAT: Provide an architectural summary containing:
+        • **Selected Patterns**: Chosen design patterns and architectural approach
+        • **Integration Strategy**: How new components will integrate with existing system
+        • **Component Boundaries**: Key interfaces and component separation
+        • **Architectural Decisions**: Major choices made with brief rationale
+        • **Consistency Notes**: How approach aligns with existing architecture
+        
         Always ensure architectural decisions align with system design principles.
 
     implementationPlanning:
@@ -182,6 +224,13 @@ config:
         Key deliverables:
         - Task breakdown with dependencies
         - Implementation sequence and verification steps
+        
+        RESPONSE FORMAT: Provide an implementation plan containing:
+        • **Task Breakdown**: 3-5 main implementation tasks in priority order
+        • **Execution Sequence**: Order of execution with key dependencies
+        • **Verification Steps**: How to validate each task completion
+        • **Safety Measures**: Rollback procedures and integrity checks
+        • **Testing Approach**: Temporary validation methods for incomplete features
         
         Always ensure implementation plan is actionable and safe.
 
@@ -208,6 +257,13 @@ config:
         - Working implementation following project patterns
         - Temporary validation code for testing
         
+        RESPONSE FORMAT: Provide an implementation summary containing:
+        • **Changes Made**: Files modified and key functionality implemented
+        • **Pattern Compliance**: How implementation follows project standards
+        • **Dependencies**: Related code and imports affected
+        • **Validation Added**: Temporary testing/debugging code included
+        • **Side Effects**: Any system impacts or changes beyond primary goal
+        
         Always ensure implementation is safe and follows project standards.
 
     verificationTesting:
@@ -233,6 +289,13 @@ config:
         - Failed test cases requiring fixes
         - Unmet requirements with specific gaps
         
+        RESPONSE FORMAT: Provide a verification report containing:
+        • **Test Results**: Pass/fail status for each major scenario tested
+        • **Failed Cases**: Specific test failures that need fixes with details
+        • **Unmet Requirements**: Requirements not satisfied with gap explanation
+        • **Integration Status**: System compatibility and integration test results
+        • **User Experience**: Validation that UX meets expectations
+        
         Always provide clear verification evidence and testing documentation.
 
     qualityAssurance:
@@ -257,6 +320,13 @@ config:
         Key deliverables:
         - Issues to fix with specific locations
         - Pattern violations requiring correction
+        
+        RESPONSE FORMAT: Provide a quality assessment containing:
+        • **Compliance Issues**: Code standard violations with specific file locations
+        • **Pattern Violations**: Inconsistencies with project patterns requiring fixes
+        • **Documentation Gaps**: Missing or incomplete documentation areas
+        • **Code Quality**: Maintainability and readability concerns
+        • **Fixes Required**: Priority-ordered list of corrections needed
         
         Always ensure deliverables meet established quality standards.
   

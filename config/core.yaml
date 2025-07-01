@@ -34,6 +34,13 @@ core:
         - runIteration execution with appropriate parameters
         - User escalation if iteration fails to resolve uncertainties
         
+        RESPONSE FORMAT: Provide a concise resolution summary containing:
+        • **Problem Identified**: Brief statement of the uncertainty or gap
+        • **Processes Selected**: 2-3 recommended processes with selection rationale
+        • **Iteration Context**: Transformed context for guiding process execution
+        • **Resolution Status**: Whether uncertainties were resolved or user escalation needed
+        • **Key Outcomes**: Main insights or decisions gained from iteration
+        
         Always ensure process selection and context transformation align with the specific problem described in input context.
 
     updateSession:
@@ -60,5 +67,12 @@ core:
         - Actualized session file saved to disk with consolidated information
         - LAML-compliant structure with resolved contradictions
         - Compact content maintaining essential context for continuation
+        
+        RESPONSE FORMAT: Provide a brief consolidation summary containing:
+        • **Content Consolidated**: Main sections updated and redundancy removed
+        • **Structure Changes**: LAML compliance improvements made
+        • **Information Actualized**: Outdated content replaced with current findings
+        • **Contradictions Resolved**: Key conflicts addressed in session
+        • **File Status**: Confirmation that updated session file was saved
         
         Always complete the process by saving the updated session file to ensure progress preservation. 
