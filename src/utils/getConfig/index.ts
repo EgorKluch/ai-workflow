@@ -1,0 +1,1 @@
+export { getConfig, getCoreConfig } from './getConfig.js'; 

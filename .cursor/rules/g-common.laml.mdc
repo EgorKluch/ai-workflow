@@ -1,0 +1,107 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+```yaml
+$meta:
+  name: 'generalNamingConventions'
+  goal: 'standardizeNamingAcrossProject'
+  domain: 'development.standards.general'
+  apply: 'allFileTypes'
+  version: 1.1
+  purpose: "Define universal naming conventions and general development standards"
+  domains: ['development.standards.general', 'codebase.naming.conventions', 'workflow.consistency.standards']
+
+naming:
+  purpose: "Establish consistent naming patterns across the project"
+  
+  fileNaming:
+    default: 'camelCase'
+    description: "Files should use camelCase naming by default unless specifically overridden by domain-specific rules"
+    examples:
+      correct: ['userService.ts', 'apiClient.js', 'configParser.mdc']
+      avoid: ['user_service.ts', 'api-client.js', 'config_parser.mdc']
+    overrides: "Domain-specific rules may override this default (e.g., kebab-case for components, snake_case for database files)"
+    
+  consistency:
+    principle: "Maintain consistent naming patterns within each domain"
+    validation: "Check that naming follows established patterns for the specific file type and domain"
+
+codeChanges:
+  purpose: "Prevent unintended side effects when making code modifications"
+  
+  sideEffectPrevention:
+    rule: "Check for potential side effects before making any code changes"
+    description: "Before implementing any modification, analyze and verify that no additional unintended consequences will occur beyond what user explicitly requested"
+    validation:
+      - "Review impact on dependent modules and functions"
+      - "Check for breaking changes to existing APIs"
+      - "Verify no unintended behavioral changes"
+      - "Confirm changes align strictly with user request scope"
+    principle: "Make only the changes explicitly requested by the user, nothing more"
+    
+  scopeCompliance:
+    coreRule: "NEVER add functionality beyond exactly what user explicitly requested"
+    criticalPrinciple: "LLM MUST NOT make product decisions independently"
+    
+    forbidden:
+      - "Auto-completing method families (CRUD operations)"
+      - "Adding methods based on common patterns" 
+      - "Anticipating future needs"
+      - "Adding convenience methods without request"
+      - "Proactive optimizations not requested"
+      
+    allowed:
+      - "Implementing exactly what was requested"
+      - "Private methods needed for requested functionality"
+      - "Dependencies required for requested feature"
+      
+    validation:
+      question: "What EXACTLY did user request?"
+      redFlag: "I think they'll need this too / This would be convenient"
+      
+    communication:
+      clarify: "Ask for clarification rather than guess user intent"
+      suggest: "Offer additional features AFTER implementing exact request"
+
+  functionPurity:
+    rule: "Functions should be pure functions unless explicitly specified otherwise"
+    description: "By default, functions should not have side effects and should return the same output for the same input"
+    requirements:
+      - "No modification of external state or variables"
+      - "No I/O operations unless explicitly required"
+      - "No mutation of input parameters"
+      - "Predictable output based solely on input parameters"
+    exceptions: "Only deviate from purity when explicitly requested or when function purpose clearly requires side effects"
+    
+  methodBehavior:
+    rule: "Methods should have predictable behavior that aligns with their name and intended purpose"
+    description: "Class methods should behave in ways that are reasonably expected based on their naming and context"
+    approach:
+      - "Method names should clearly indicate their primary purpose and expected behavior"
+      - "Side effects should be reasonable and expected for the method's intended function"
+      - "Avoid unexpected modifications that don't align with the method's apparent purpose"
+      - "Common operational patterns (logging, caching, monitoring) are acceptable when they don't change core behavior"
+    acceptablePatterns:
+      - "Getters may perform internal optimizations (caching, lazy loading, memoization)"
+      - "Any method may include logging, debugging, or monitoring operations"
+      - "Methods may perform internal cleanup or state optimization"
+      - "Performance-related internal modifications are generally acceptable"
+    principle: "Focus on avoiding surprising or contradictory behavior rather than enforcing strict purity"
+
+  codeStyleCompliance:
+    rule: "Do not update existing code for style/pattern compliance without explicit user request"
+    description: "Avoid refactoring existing working code to match current patterns unless specifically requested"
+    approach: "Focus on new code following patterns rather than updating legacy code"
+    exception: "Only update existing code style when user explicitly asks for refactoring or style improvements"
+
+codeOrganization:
+  purpose: "Define standards for organizing code structure and components"
+  
+  utilities:
+    rule: "Each utility should be created in its own folder"
+    description: "Utilities must be organized into separate folders for better maintainability and clarity"
+    structure: "Each utility should have its own dedicated folder containing all related files"
+    rationale: "Improves code organization, makes utilities easier to locate, and enables better dependency management"
+    

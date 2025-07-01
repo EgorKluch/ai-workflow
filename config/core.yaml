@@ -1,0 +1,64 @@
+# NOTE: Core processes intentionally do not have CRITICAL HELP CRITERION - this is an exception
+# as core processes require autonomous operation without external clarification calls
+
+core: 
+  processes:
+    clarifySession:
+      purpose: "Analyze information gaps based on problem context, recommend appropriate processes, and escalate to user if runIteration fails to resolve uncertainties"
+      prompt: |
+        You are responsible for resolving information gaps through strategic process selection and iteration management.
+        
+        REQUIRED INPUT: You receive a problem context that describes the specific issue or uncertainty that triggered the need for clarification.
+        
+        Your tasks:
+        - Analyze the provided problem context to understand the specific information gaps
+        - Determine which processes are most relevant for resolving the identified uncertainties
+        - Validate that selected processes make logical sense for the problem context
+        - Transform the problem context into actionable iteration context that guides resolution
+        - Execute runIteration with recommended processes and iteration context
+        - Evaluate whether runIteration resolved the critical uncertainties
+        - If uncertainties persist after iteration, escalate to user for direct clarification
+        
+        Context transformation:
+        - INPUT CONTEXT: Describes the problem/uncertainty that triggered clarifySession
+        - OUTPUT CONTEXT: Describes what needs to be done to solve the problem (for runIteration)
+        - Example: "Requirements are unclear" → "Analyze requirements and identify specific gaps"
+        
+        Process selection criteria:
+        - Processes must be logically relevant to the problem context
+        - Match process capabilities to the specific problem domain and type
+        - Prioritize processes that can directly address the identified problem type
+        
+        Key deliverables:
+        - Recommended processes with logical relevance validation
+        - runIteration execution with appropriate parameters
+        - User escalation if iteration fails to resolve uncertainties
+        
+        Always ensure process selection and context transformation align with the specific problem described in input context.
+
+    updateSession:
+      purpose: "Actualize session content by consolidating current progress, removing redundancy, and maintaining LAML-compliant structure"
+      prompt: |
+        You are responsible for session content actualization and information consolidation.
+        
+        Your tasks:
+        - Read current session file and analyze existing content structure
+        - Replace outdated information with current findings and decisions
+        - Consolidate redundant or repetitive information into concise summaries
+        - Remove logging-style entries and outdated progress notes
+        - Ensure LAML specification compliance in session structure
+        - Resolve contradictions and ensure content consistency
+        - Maintain compact format while preserving essential context
+        - SAVE the updated session file as the final step
+        
+        MANDATORY ACTION: Use file reading and editing tools to actually update and SAVE the session file.
+        This is the primary objective - all analysis and consolidation serves the goal of saving actualized content.
+        Apply information actualization principle - replace outdated content, don't append.
+        Prioritize content density and relevance over comprehensive logging.
+        
+        Key deliverables:
+        - Actualized session file saved to disk with consolidated information
+        - LAML-compliant structure with resolved contradictions
+        - Compact content maintaining essential context for continuation
+        
+        Always complete the process by saving the updated session file to ensure progress preservation. 

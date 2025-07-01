@@ -1,0 +1,262 @@
+config: 
+  processes:
+    problemAnalysis:
+      purpose: "Analyze and define the core problem, identify affected users, and establish success criteria with clear scope boundaries"
+      prompt: |
+        You are responsible for comprehensive problem analysis and context definition.
+        
+        Your tasks:
+        - Identify and clearly articulate the core problem being addressed
+        - Analyze affected user groups and their specific pain points
+        - Trace the root cause of the problem to its fundamental source
+        - Define verifiable success criteria that determine completion
+        - Establish clear scope boundaries (inScope, outOfScope, onReview)
+        - Document current system limitations and constraints
+        
+        Focus on understanding the business value and user impact.
+        Avoid technical implementation details - focus on problem definition.
+        
+        CRITICAL HELP CRITERION: If the problem statement is ambiguous, lacks clear user impact definition, 
+        or success criteria cannot be measured objectively, immediately call clarifySession() to resolve gaps.
+        
+        Key deliverables:
+        - Clear problem statement with business context
+        - Affected users analysis with impact assessment
+        - Root cause identification
+        - Verifiable success criteria
+        - Scope boundaries with three mandatory sections
+        
+        Always validate that the problem is solvable and the scope is realistic.
+
+    technicalDiscovery:
+      purpose: "Conduct systematic codebase analysis to understand current architecture, patterns, dependencies, and integration points"
+      prompt: |
+        You are responsible for comprehensive technical context discovery through codebase analysis.
+        
+        Your tasks:
+        - Perform systematic codebase search to understand current architecture
+        - Identify relevant files, modules, and components for the task
+        - Map technical and functional dependencies
+        - Analyze existing patterns and conventions
+        - Identify integration points and potential conflicts
+        - Document technical constraints and opportunities
+        
+        Use codebase_search, grep_search, and file_search extensively.
+        Focus on understanding existing systems before proposing changes.
+        
+        CRITICAL HELP CRITERION: If you cannot locate relevant code files or understand the existing 
+        architecture patterns after comprehensive search, immediately call clarifySession() for guidance.
+        
+        Key deliverables:
+        - Current architecture analysis
+        - Relevant files and dependencies mapping
+        - Existing patterns and conventions documentation
+        - Integration points identification
+        - Technical constraints assessment
+        
+        Always validate findings against the actual codebase through systematic analysis.
+
+    requirementsClarification:
+      purpose: "Resolve requirement ambiguities, validate assumptions, and establish clear implementation specifications"
+      prompt: |
+        You are responsible for eliminating requirement uncertainties and establishing clear specifications.
+        
+        Your tasks:
+        - Identify gaps, ambiguities, and missing information in requirements
+        - Document multiple implementation approaches with trade-offs
+        - Document unclear preferences and constraints requiring clarification
+        - Validate all assumptions before proceeding
+        - Resolve conflicts between different requirements
+        - Establish clear decision points and validation criteria
+        
+        Follow zero-assumptions policy - never guess user intentions.
+        Present options with clear implications for user decision.
+        
+        CRITICAL HELP CRITERION: If any requirement remains ambiguous, multiple valid approaches exist 
+        without clear user preference, or assumptions cannot be validated, immediately call clarifySession().
+        
+        Key deliverables:
+        - Gap analysis with specific questions
+        - Implementation options with trade-offs
+        - User preferences and constraints documentation
+        - Validated assumptions list
+        - Clear decision points resolution
+        
+        Always ensure requirements are complete and implementable before proceeding.
+
+    scenarioDefinition:
+      purpose: "Define comprehensive user scenarios including success cases, failure handling, and edge cases with verification procedures"
+      prompt: |
+        You are responsible for creating complete user scenario definitions with testing procedures.
+        
+        Your tasks:
+        - Define successful user scenarios with expected outcomes
+        - Create failure scenarios with proper error handling
+        - Identify edge cases and boundary conditions
+        - Establish manual testing procedures for each scenario
+        - Create verification lists for user confirmation
+        - Document user workflows and interaction patterns
+        
+        Cover all aspects of user experience including error recovery.
+        Ensure all scenarios are manually testable by users.
+        
+        CRITICAL HELP CRITERION: If user workflows are unclear, expected error behaviors are undefined, 
+        or scenarios cannot be manually tested, immediately call clarifySession() for clarification.
+        
+        Key deliverables:
+        - Success scenarios with testing steps
+        - Failure scenarios with expected handling
+        - Edge cases with validation criteria
+        
+        Always ensure scenarios reflect real user needs and are testable.
+
+    riskAssessment:
+      purpose: "Evaluate technical risks, complexity factors, breaking changes, and performance implications"
+      prompt: |
+        You are responsible for comprehensive risk evaluation and complexity assessment.
+        
+        Your tasks:
+        - Identify potential breaking changes and compatibility issues
+        - Assess performance implications and scalability concerns
+        - Evaluate implementation complexity and effort requirements
+        - Analyze dependency risks and version conflicts
+        - Document mitigation strategies for identified risks
+        - Assess rollback capabilities and system safety
+        
+        Focus on preventing issues before they occur.
+        Consider both technical and business risks.
+        
+        CRITICAL HELP CRITERION: If high-risk elements are identified without clear mitigation strategies, 
+        or complexity assessment reveals unclear dependencies, immediately call clarifySession().
+        
+        Key deliverables:
+        - High-priority risks with mitigation strategies
+        - Breaking changes requiring attention
+        
+        Always provide actionable risk mitigation approaches.
+
+    architecturalAnalysis:
+      purpose: "Analyze system architecture, select appropriate patterns, and define integration strategies"
+      prompt: |
+        You are responsible for architectural analysis and pattern selection.
+        
+        Your tasks:
+        - Analyze existing architectural patterns in the codebase
+        - Evaluate different architectural approaches for the task
+        - Select appropriate design patterns and integration strategies
+        - Define component boundaries and interfaces
+        - Ensure consistency with existing system architecture
+        - Document architectural decisions with rationale
+        
+        Align with existing patterns unless there's compelling reason to change.
+        Consider maintainability and future scalability.
+        
+        CRITICAL HELP CRITERION: If existing architectural patterns are inconsistent, multiple valid 
+        architectural approaches exist without clear selection criteria, immediately call clarifySession().
+        
+        Key deliverables:
+        - Selected patterns and integration approach
+        - Architectural decisions with rationale
+        
+        Always ensure architectural decisions align with system design principles.
+
+    implementationPlanning:
+      purpose: "Create detailed, actionable implementation strategy with independent, testable tasks"
+      prompt: |
+        You are responsible for creating comprehensive implementation strategy.
+        
+        Your tasks:
+        - Break down implementation into independent, testable tasks
+        - Define optimal execution sequence considering dependencies
+        - Create verification procedures for each implementation task
+        - Establish rollback safety and system integrity measures
+        - Plan temporary validation approaches for testing
+        - Reference relevant technical context for each task
+        
+        Ensure each task produces user-verifiable outcomes.
+        Structure tasks to maintain system integrity if interrupted.
+        
+        CRITICAL HELP CRITERION: If tasks cannot be made independent, verification procedures are unclear, 
+        or rollback safety cannot be ensured, immediately call clarifySession().
+        
+        Key deliverables:
+        - Task breakdown with dependencies
+        - Implementation sequence and verification steps
+        
+        Always ensure implementation plan is actionable and safe.
+
+    codeImplementation:
+      purpose: "Execute code implementation with systematic analysis of dependencies, imports, and side effects"
+      prompt: |
+        You are responsible for safe and systematic code implementation.
+        
+        Your tasks:
+        - Conduct comprehensive systemic analysis before any code changes
+        - Identify ALL related code, dependencies, imports, and potential side effects
+        - Implement functionality following established project patterns
+        - Add temporary validation code for testing incomplete features
+        - Ensure no functionality degradation or broken imports
+        - Maintain code quality and consistency standards
+        
+        CRITICAL: Always analyze system impact before implementation.
+        Never implement without complete understanding of related code.
+        
+        CRITICAL HELP CRITERION: If related code analysis reveals unclear dependencies, potential side effects 
+        cannot be determined, or implementation approaches conflict, immediately call clarifySession().
+        
+        Key deliverables:
+        - Working implementation following project patterns
+        - Temporary validation code for testing
+        
+        Always ensure implementation is safe and follows project standards.
+
+    verificationTesting:
+      purpose: "Conduct comprehensive verification of implementation against requirements and user scenarios"
+      prompt: |
+        You are responsible for thorough verification and testing of implemented functionality.
+        
+        Your tasks:
+        - Verify implementation meets all defined requirements
+        - Test all user scenarios including success, failure, and edge cases
+        - Validate error handling and recovery procedures
+        - Confirm user experience meets expectations
+        - Test system integration and compatibility
+        - Document verification results with clear outcomes
+        
+        Focus on manual testing procedures users can execute.
+        Ensure all scenarios are thoroughly validated.
+        
+        CRITICAL HELP CRITERION: If verification procedures cannot be executed manually, expected outcomes 
+        are unclear, or testing reveals unresolved issues, immediately call clarifySession().
+        
+        Key deliverables:
+        - Failed test cases requiring fixes
+        - Unmet requirements with specific gaps
+        
+        Always provide clear verification evidence and testing documentation.
+
+    qualityAssurance:
+      purpose: "Ensure comprehensive quality compliance including code standards, pattern consistency, and documentation requirements"
+      prompt: |
+        You are responsible for comprehensive quality assurance and standards compliance.
+        
+        Your tasks:
+        - Review code implementation against project quality standards
+        - Validate pattern consistency and architectural alignment
+        - Ensure comprehensive documentation and testing coverage
+        - Verify naming conventions and code organization
+        - Confirm maintainability and readability requirements
+        - Validate session file compliance with template standards
+        
+        Apply established project standards without modification.
+        Focus on consistency and maintainability.
+        
+        CRITICAL HELP CRITERION: If quality standards are unclear, pattern consistency cannot be determined, 
+        or compliance requirements are ambiguous, immediately call clarifySession().
+        
+        Key deliverables:
+        - Issues to fix with specific locations
+        - Pattern violations requiring correction
+        
+        Always ensure deliverables meet established quality standards.
+  

@@ -1,0 +1,405 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+```yaml
+$meta:
+  name: 'flowmcpLibraryUsage'
+  goal: 'comprehensiveMcpToolkitGuidance'
+  domain: 'mcp.toolkit.usage'
+  apply: 'mcpProjectsUsingFlowmcp'
+  version: 2.1.1
+  purpose: "Complete guidance for using FlowMCP toolkit in MCP projects without source code access"
+  domains: ['mcp.toolkit.usage', 'development.workflow.automation', 'protocol.integration.patterns']
+
+# === FLOWMCP LIBRARY OVERVIEW ===
+flowmcp:
+  description: "Powerful toolkit for building MCP (Model Context Protocol) tools with automatic validation, error handling, and project path management"
+  version: "2.1.1"
+  installation: "npm install flowmcp"
+  repository: "https://github.com/EgorKluch/flowmcp.git"
+  
+  keyFeatures:
+    - "Automatic project parameter injection for all MCP tools"
+    - "Schema validation and extension with project path validation"
+    - "Session-based error handling and response generation"
+    - "Independent logging with frequency-based error/warning analysis"
+    - "Full TypeScript support with comprehensive type definitions"
+    - "MCP Server integration with applyToServer() method"
+
+# === CORE MODULES ===
+modules:
+  McpBuilder:
+    purpose: "Build and register MCP tools with automatic schema validation and project parameter injection"
+    usage: "Primary module for creating MCP tools with enhanced capabilities"
+    
+    import: "import { McpBuilder } from 'flowmcp'"
+    
+    features:
+      automaticProjectInjection: "All tools automatically receive 'project' parameter with absolute path validation"
+      schemaExtension: "User schemas are extended with required project parameter"
+      toolValidation: "Comprehensive tool validation including name patterns and schema structure"
+      serverIntegration: "Direct integration with MCP Server via applyToServer() method"
+      
+    constructor:
+      signature: "new McpBuilder(opts?: McpBuilder.Opts)"
+      parameters: "opts (optional) - Configuration options"
+      
+    methods:
+      addTool:
+        signature: "addTool(tool: Tool, handler: McpBuilder.ToolHandler): McpBuilder.Response<void>"
+        purpose: "Register MCP tool with automatic project parameter injection"
+        parameters:
+          tool: "MCP Tool definition with user's input schema"
+          handler: "Function signature: (session: McpSession, request: CallToolRequest) => Promise<CallToolResult>"
+        behavior: "Extends user schema with project parameter, validates tool, creates enhanced handler"
+        returns: "Response indicating success/failure with errors"
+        
+      applyToServer:
+        signature: "applyToServer(server: Server): void"
+        purpose: "Apply all registered tools to MCP Server instance"
+        parameters:
+          server: "MCP Server instance from @modelcontextprotocol/sdk"
+        behavior: "Registers list_tools and call_tool handlers on server"
+        
+    toolHandler:
+      signature: "(session: McpSession, request: CallToolRequest) => Promise<CallToolResult>"
+      parameters:
+        session: "McpSession instance for error handling and result generation"
+        request: "CallToolRequest with guaranteed project parameter"
+      projectAccess: "request.params.arguments.project - validated absolute path"
+      errorHandling: "Use session.logger.addError() to collect errors, return session.getResult({}) for error responses"
+      
+    automaticProjectParameter:
+      description: "Every tool automatically receives project parameter"
+      validation: "Project must be absolute path string"
+      schemaExtension:
+        properties: "{ project: { type: 'string', description: 'Absolute path to the project directory' } }"
+        required: "['project'] is automatically added to required fields"
+      access: "const { project, ...userParams } = request.params.arguments"
+
+  McpSession:
+    purpose: "Handle MCP request sessions with error management and result generation"
+    usage: "Passed to tool handlers for error handling and response generation"
+    
+    import: "import { McpSession } from 'flowmcp'"
+    
+    constructor:
+      signature: "new McpSession(opts?: McpSession.Opts)"
+      note: "Usually created automatically by McpBuilder, but can be instantiated independently"
+      
+    properties:
+      logger: "Independent Logger instance for collecting errors and warnings"
+      
+    methods:
+      getResult:
+        signature: "getResult<TData>(data: TData): CallToolResult"
+        purpose: "Generate MCP-compliant result with collected errors and warnings"
+        parameters:
+          data: "Tool result data of any type"
+        returns: "CallToolResult with success/error status and formatted content"
+        behavior: "Includes all collected errors/warnings from session logger"
+        
+    errorHandling:
+      collectErrors: "session.logger.addError() - collect errors, continue execution"
+      errorResponse: "session.getResult({}) - return error response with collected errors"
+
+  Logger:
+    purpose: "Independent error and warning collection with frequency analysis"
+    usage: "Can be used standalone or accessed via session.logger"
+    
+    import: "import { Logger } from 'flowmcp'"
+    
+    constructor:
+      signature: "new Logger()"
+      
+    methods:
+      addError:
+        signature: "addError(error: Logger.Error): void"
+        purpose: "Collect error with automatic grouping and frequency tracking"
+        parameters:
+          error: "{ message: string, code: string, context?: unknown }"
+        behavior: "Groups by code and message, tracks context frequency"
+        
+      addWarning:
+        signature: "addWarning(warning: Logger.Warning): void"
+        purpose: "Collect warning with automatic grouping and frequency tracking"
+        parameters:
+          warning: "{ message: string, code: string, context?: unknown }"
+        behavior: "Groups by code and message, tracks context frequency"
+        
+      getResponse:
+        signature: "getResponse(): Logger.Response"
+        purpose: "Get prioritized summary of collected errors and warnings"
+        returns: "{ errors: Error[], warnings: Warning[] }"
+        behavior: "Returns top 10 errors and warnings sorted by frequency, max 10 contexts per item"
+        
+      hasError:
+        signature: "hasError(name: string): boolean"
+        purpose: "Check if specific error exists by code"
+        parameters:
+          name: "Error code to check for existence"
+        returns: "true if error with specified code exists, false otherwise"
+        
+      hasWarning:
+        signature: "hasWarning(name: string): boolean"
+        purpose: "Check if specific warning exists by code"
+        parameters:
+          name: "Warning code to check for existence"
+        returns: "true if warning with specified code exists, false otherwise"
+        
+      getError:
+        signature: "getError(name: string): ErrorGroup | undefined"
+        purpose: "Get specific error by code as-is from internal structure"
+        parameters:
+          name: "Error code to retrieve"
+        returns: "ErrorGroup with amount and contexts, or undefined if not found"
+        
+      getWarning:
+        signature: "getWarning(name: string): WarningGroup | undefined"
+        purpose: "Get specific warning by code as-is from internal structure"
+        parameters:
+          name: "Warning code to retrieve"
+        returns: "WarningGroup with amount and contexts, or undefined if not found"
+        
+    frequencyAnalysis:
+      grouping: "Errors and warnings grouped by code and message"
+      contextTracking: "Tracks frequency of different contexts for same error/warning"
+      prioritization: "Results sorted by occurrence frequency"
+      limitations: "Top 10 items returned, max 10 contexts per item"
+
+# === USAGE PATTERNS ===
+patterns:
+  basicToolCreation:
+    description: "Standard pattern for creating MCP tools with FlowMCP"
+    code: |
+      import { McpBuilder } from 'flowmcp';
+      import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+      
+      const builder = new McpBuilder();
+      
+      builder.addTool({
+        name: 'read_file',
+        description: 'Read a file from the project',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            filename: { type: 'string' }
+          },
+          required: ['filename']
+        }
+      }, async (session, request) => {
+        const { project, filename } = request.params.arguments;
+        
+        try {
+          const content = await readFile(path.join(project, filename));
+          return session.getResult({ content, filename });
+        } catch (error) {
+          session.logger.addError({
+            code: 'FILE_READ_ERROR',
+            message: `Failed to read file: ${error.message}`,
+            context: { project, filename }
+          });
+          
+          return session.getResult({ error: 'File not found' });
+        }
+      });
+      
+      const server = new Server({ name: 'file-server', version: '1.0.0' });
+      builder.applyToServer(server);
+      
+  errorHandlingPatterns:
+    collectingErrors:
+      description: "Collect errors but continue execution"
+      code: |
+        // Collect multiple errors, continue processing
+        if (invalidInput) {
+          session.logger.addError({
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid input format',
+            context: { input: userInput }
+          });
+        }
+        
+        // Process continues, errors included in final result
+        return session.getResult({ processedData });
+        
+    errorResponses:
+      description: "Return error response for failed operations"
+      code: |
+        // Add error and return error response
+        if (projectNotFound) {
+          session.logger.addError({
+            code: 'PROJECT_NOT_FOUND',
+            message: 'Project directory does not exist',
+            context: { project: projectPath }
+          });
+          return session.getResult({});
+        }
+        
+    warningCollection:
+      description: "Collect warnings for deprecated or suboptimal usage"
+      code: |
+        if (usingDeprecatedApi) {
+          session.logger.addWarning({
+            code: 'DEPRECATED_API',
+            message: 'Using deprecated API endpoint',
+            context: { endpoint: apiEndpoint }
+          });
+        }
+        
+  independentLogging:
+    description: "Using Logger independently of sessions"
+    code: |
+      import { Logger } from 'flowmcp';
+      
+      const logger = new Logger();
+      
+      // Collect errors and warnings
+      logger.addError({ code: 'VALIDATION', message: 'Invalid format' });
+      logger.addWarning({ code: 'PERFORMANCE', message: 'Slow operation' });
+      
+      // Get prioritized summary
+      const { errors, warnings } = logger.getResponse();
+      
+      // Check for specific errors/warnings
+      if (logger.hasError('VALIDATION')) {
+        const validationError = logger.getError('VALIDATION');
+        console.log(`Validation errors occurred ${validationError.amount} times`);
+      }
+      
+      if (logger.hasWarning('PERFORMANCE')) {
+        const performanceWarning = logger.getWarning('PERFORMANCE');
+        console.log(`Performance warnings: ${performanceWarning.contexts.length} contexts`);
+      }
+      
+  serverIntegration:
+    description: "Complete MCP server setup with FlowMCP"
+    code: |
+      import { McpBuilder } from 'flowmcp';
+      import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+      import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+      
+      const builder = new McpBuilder();
+      const server = new Server({ name: 'my-mcp-server', version: '1.0.0' });
+      
+      // Register multiple tools
+      builder.addTool(toolDefinition1, handler1);
+      builder.addTool(toolDefinition2, handler2);
+      
+      // Apply all tools to server
+      builder.applyToServer(server);
+      
+      // Start server
+      const transport = new StdioServerTransport();
+      server.connect(transport);
+
+# === ERROR CODES ===
+errorCodes:
+  McpToolErrorCode:
+    TOOL_NOT_FOUND: "Requested tool not found in registry"
+    TOOL_ALREADY_EXISTS: "Tool with same name already registered"
+    TOOL_EXECUTION_ERROR: "Error occurred during tool execution"
+    INVALID_TOOL_SCHEMA: "Tool schema validation failed"
+    MISSING_PROJECT_PARAMETER: "Required project parameter missing"
+    INVALID_PROJECT_PATH: "Project path is not absolute or invalid"
+    
+  customErrorCodes:
+    recommendation: "Use descriptive, UPPER_CASE error codes for your application"
+    examples:
+      - "FILE_READ_ERROR"
+      - "VALIDATION_ERROR"
+      - "PERMISSION_DENIED"
+      - "RESOURCE_NOT_FOUND"
+      - "PROCESSING_FAILED"
+
+# === TYPE DEFINITIONS ===
+types:
+  McpBuilder:
+    ToolHandler: "(session: McpSession, request: CallToolRequest) => Promise<CallToolResult>"
+    Response: "SuccessResponse<TData> | ErrorResponse<TData>"
+  McpSession:
+    Opts: "Configuration options for McpSession constructor"
+    
+  Logger:
+    Error: "{ message?: string, code: string, context?: unknown }"
+    Warning: "{ message?: string, code: string, context?: unknown }"
+    Response: "{ errors: ResponseError[], warnings: ResponseWarning[] }"
+    
+
+
+# === BEST PRACTICES ===
+bestPractices:
+  toolDesign:
+    naming: "Use kebab-case for tool names (e.g., 'read-file', 'process-data')"
+    description: "Provide clear, concise tool descriptions"
+    schema: "Define precise input schemas with proper validation"
+    
+  errorHandling:
+    granularity: "Use specific error codes for different failure types"
+    descriptiveCodes: "Use descriptive error codes (FILE_NOT_FOUND vs NOT_FOUND)"
+    messageUsage: "Add message only when code is insufficient for understanding the error"
+    contextPurpose: "Use context to provide meaningful information for LLM error handling"
+    contextUniqueness: "Context should not duplicate information from message or code"
+    groupingByCode: "Errors and warnings are grouped by code, not by message"
+    errorUtilities: "Create utility functions for common error patterns to ensure consistency"
+    errorResponses: "Use session.logger.addError() followed by session.getResult({}) for error conditions"
+    errorCollection: "Use session.logger for consistent error collection and reporting"
+    
+  projectParameter:
+    validation: "Always validate project path exists before use"
+    pathHandling: "Use path.join() to combine project with relative paths"
+    security: "Validate that file paths stay within project directory"
+    
+  logging:
+    frequency: "Logger automatically handles frequency analysis"
+    codes: "Use consistent error/warning codes across your application"
+    context: "Use context to pass meaningful debugging information, not duplicate data"
+    grouping: "All errors/warnings with same code are grouped together regardless of message"
+    utilities: "Use helper functions for consistent error creation across application"
+    granularAccess: "Use hasError/hasWarning to check existence, getError/getWarning to access specific error groups"
+    specificDebugging: "Use specific error access methods (getError/getWarning) for detailed analysis and debugging"
+    conditionalHandling: "Check specific errors with hasError(code) before handling them differently"
+    errorInspection: "Use getError(code) to access full error details including frequency and contexts"
+    
+  performance:
+    sessionReuse: "Don't create new sessions unnecessarily - use provided session"
+    logging: "Logger frequency analysis optimizes error reporting automatically"
+    validation: "McpBuilder handles schema validation efficiently"
+
+# === DEPENDENCIES ===
+dependencies:
+  required:
+    "@modelcontextprotocol/sdk": "^0.4.0 - Core MCP protocol implementation"
+    "node": ">=18.0.0 - Minimum Node.js version"
+    
+  peerDependencies:
+    typescript: "^5.0.0 - For TypeScript projects (recommended)"
+    
+  devDependencies:
+    note: "FlowMCP has no runtime dependencies beyond MCP SDK"
+
+# === TROUBLESHOOTING ===
+troubleshooting:
+  commonIssues:
+    projectParameterMissing:
+      issue: "Tools fail with MISSING_PROJECT_PARAMETER"
+      solution: "Ensure MCP client provides absolute project path in requests"
+      
+    schemaValidationFails:
+      issue: "Tools rejected with INVALID_TOOL_SCHEMA"
+      solution: "Verify tool name matches pattern ^[a-zA-Z][a-zA-Z0-9_-]*$ and has valid schema"
+      
+    duplicateToolNames:
+      issue: "TOOL_ALREADY_EXISTS error when adding tools"
+      solution: "Use unique tool names, check for accidental duplicate registrations"
+      
+    errorHandling:
+      issue: "Error responses not properly formatted"
+      solution: "Use session.logger.addError() followed by return session.getResult({}) for error conditions"
+      
+  debugging:
+    errorContext: "Check error context objects for detailed debugging information"
+    frequencyAnalysis: "Use logger.getResponse() to see most frequent errors first"
+    typeChecking: "Enable TypeScript strict mode for better type safety"

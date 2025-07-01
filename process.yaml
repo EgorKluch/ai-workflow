@@ -1,0 +1,287 @@
+# === PRINCIPLES ===
+principles:
+  purpose: "Core beliefs for fully automatic development workflow"
+  
+  fullAutomation:
+    belief: "LLM + MCP tools provide complete automation from user request to implementation"
+    demonstration: "Single user request triggers systematic, automated execution through all necessary processes"
+    practicalBenefit: "Developer provides high-level goal, system executes everything automatically with minimal intervention"
+
+  systematicProgression:
+    belief: "Each process analyzes session state to determine if goal is achieved and what steps are needed"
+    demonstration: "planSessionIteration tool analyzes session file and provides instruction for next steps"
+    practicalBenefit: "Intelligent workflow execution based on actual session progress and goal achievement"
+
+  contextPreservation:
+    belief: "Every process completion updates session state for intelligent next step analysis"
+    demonstration: "updateSession + planSessionIteration called after every process to analyze progress"
+    practicalBenefit: "Preserved context, intelligent progress analysis, goal-oriented execution"
+
+  cyclicalExecution:
+    belief: "Workflow is designed to run in continuous cycles until goal is achieved"
+    demonstration: "runSessionIteration → updateSession → planSessionIteration → runSessionIteration → ..."
+    practicalBenefit: "Persistent execution that automatically continues until development goal is fully completed"
+
+# === TOOL TYPES ===
+toolTypes:
+  purpose: "Classification of MCP tools by their return behavior"
+  
+  promptReturningTools:
+    description: "Tools that return textual prompts containing execution algorithms"
+    behavior: "outputData.prompt contains algorithm description as string"
+    examples: ["planSessionIteration", "clarifySession", "updateSession", "runSessionIteration"]
+    
+  dataReturningTools:
+    description: "Tools that return structured data for processing"
+    behavior: "outputData contains structured information"
+    examples: ["getSessionProcesses", "createSession"]
+
+# === REQUIRED TOOLS ===
+tools:
+  purpose: "Essential MCP tools for automatic workflow execution"
+  
+  createSession:
+    purpose: "Initialize development session with LAML file and trigger first iteration planning"
+    signature: "createSession(sessionPath: string)"
+    toolType: "dataReturningTools"
+    description: "MCP tool that creates session file structure and returns result of planSessionIteration for immediate workflow start"
+      
+    inputData:
+      sessionPath:
+        type: "string"
+        description: "Relative path to session file (e.g., 'sessions/feature-auth.laml')"
+        required: true
+        validation: "Must end with .laml extension and be valid file path"
+        
+    outputData:
+      success:
+        description: "Returns the exact result of planSessionIteration call"
+        properties:
+          processes:
+            type: "object"
+            description: "Available processes from config.yaml with their purposes"
+          prompt:
+            type: "string"
+            description: "Algorithm prompt for LLM to start workflow execution"
+          
+    algorithm:
+      - "MCP: Check if file with sessionPath exists and delete it if it does"
+      - "MCP: Create new session file at sessionPath"
+      - "MCP: Call planSessionIteration() internally"
+      - "MCP: Return planSessionIteration result directly without modification"
+      
+  runSessionIteration:
+    purpose: "Execute specified processes and return combined execution prompt"
+    signature: "runSessionIteration({processes: string[], context?: string})"
+    toolType: "promptReturningTools"
+    description: "Loads process definitions from config.yaml and returns unified execution prompt"
+    
+    inputData:
+      processes:
+        type: "string[]"
+        description: "Array of process names to execute (e.g., ['problemAnalysis', 'technicalDiscovery'])"
+        required: true
+        validation: "Process names must exist in config.yaml"
+      context:
+        type: "string"
+        description: "Specific context or focus area for process execution guidance"
+        required: false
+        purpose: "Refines process prompts with targeted context for more precise execution"
+    
+    outputData:
+      success:
+        prompt:
+          type: "string"
+          description: "Unified execution algorithm prompt for LLM"
+          algorithmContent:
+            - "LLM: Execute all specified processes using their prompts provided by MCP"
+            - "LLM: Apply context filtering if context parameter provided"
+            - "LLM: After execution completion, call updateSession() to get session update procedure"
+            - "LLM: Execute the session update procedure to analyze and save progress"
+            - "LLM: After session update completion, call planSessionIteration() to determine next steps"
+            - "LLM: Follow the next steps returned by planSessionIteration"
+        context:
+          type: "string"
+          description: "Echo of input context parameter"
+        processes:
+          type: "object"
+          description: "Process definitions loaded from config.yaml"
+          structure: "{ processName: { purpose: string, prompt: string } }"
+     
+      algorithm:
+       - "MCP: Load process definitions from config.yaml for specified process names"
+       - "MCP: Prepare unified execution prompt with process instructions"
+       - "MCP: Include context guidance if context parameter provided"
+       - "MCP: Add mandatory updateSession() + planSessionIteration() call sequence to prompt"
+       - "MCP: Return structured result with prompt, context, and process definitions"
+
+  updateSession:
+    purpose: "Return prompt for session state update procedure"
+    signature: "updateSession()"
+    toolType: "promptReturningTools"
+    description: "Provides algorithmic prompt for LLM to analyze session and update its state"
+    
+    inputData:
+      none: "No input parameters required - LLM determines what to update based on session analysis"
+        
+    outputData:
+      success:
+        prompt:
+          type: "string"
+          description: "Algorithm prompt for session update procedure"
+          source: "core.yaml configuration file"
+          algorithmContent: "LLM: Instructions on how to read session file, analyze current state, determine necessary updates, and save back"
+    
+      algorithm:
+       - "MCP: Read session update prompt from core.yaml"
+       - "MCP: Return prompt as string for LLM execution"
+       - "MCP: LLM will analyze session content and determine updates autonomously"
+      
+  getSessionProcesses:
+    purpose: "Return available processes from config.yaml"
+    signature: "getSessionProcesses()"
+    toolType: "dataReturningTools"
+    description: "Provides list of all available processes with their purposes"
+    
+    inputData:
+      none: "No input parameters required - loads processes from config.yaml directly"
+      
+    outputData:
+      success:
+        processes:
+          type: "object"
+          description: "Available processes mapped to their purposes"
+          structure: "{ processName: 'purpose string' }"
+          
+      algorithm:
+       - "MCP: Load processes from config.yaml"
+       - "MCP: Extract process names and purposes"
+       - "MCP: Return object mapping process names to their purpose descriptions"
+       - "MCP: Implementation: reduce(processes, (result, {purpose}, name) => ({...result, [name]: purpose}), {})"
+         
+  clarifySession:
+    purpose: "Handle uncertainty by selecting appropriate processes for resolution"
+    signature: "clarifySession(context: string)"
+    toolType: "promptReturningTools"
+    description: "Analyzes uncertain situation and provides resolution strategy prompt"
+    
+    inputData:
+      context:
+        type: "string"
+        description: "Description of uncertain situation, ambiguity, conflict that needs clarification"
+        required: true
+      
+    outputData:
+      success:
+        prompt:
+          type: "string"
+          description: "Resolution strategy algorithm for LLM"
+          algorithmContent:
+            - "LLM: Analyze provided context to identify information gaps"
+            - "LLM: Select appropriate processes from available list that can help resolve uncertainty"
+            - "LLM: Call runSessionIteration with selected processes and provided context"
+            - "LLM: If after iteration completion the problem is not resolved, explicitly request user help"
+        processes:
+          type: "object"
+          description: "Available processes for selection (from getSessionProcesses)"
+        context:
+          type: "string"
+          description: "Echo of input context parameter"
+    
+      algorithm:
+        - "MCP: Get available processes via getSessionProcesses()"
+        - "MCP: Read clarification prompt template from core.yaml"
+        - "MCP: Combine template with context and available processes"
+        - "MCP: Return structured result with resolution algorithm"
+            
+  planSessionIteration:
+    purpose: "Analyze session state and determine next iteration approach"
+    signature: "planSessionIteration()"
+    toolType: "promptReturningTools"
+    description: "Strategic planning tool that determines next workflow steps based on session progress"
+    
+    inputData:
+      none: "No input parameters - LLM uses session path from context"
+            
+    outputData:
+      success:
+        prompt:
+          type: "string"
+          description: "Strategic planning algorithm for LLM"
+          algorithmContent:
+            - "LLM: Read session file and parse session goal to determine success criteria"
+            - "LLM: Evaluate current progress against goal requirements by analyzing session content"
+            - "LLM: If session goal is fully achieved: execute runSessionIteration({processes: ['qualityAssurance']})"
+            - "LLM: If goal not achieved, determine if implementation can begin or if information is missing"
+            - "LLM: If information missing: formulate description of missing information and call clarifySession({context: <description>})"
+            - "LLM: If information sufficient: execute runSessionIteration({processes: ['codeImplementation']})"
+        processes:
+          type: "object"
+          description: "Available processes for strategic selection (from getSessionProcesses)"
+    
+      algorithm:
+       - "MCP: Get available processes via getSessionProcesses()"
+       - "MCP: Prepare strategic planning prompt with decision logic"
+       - "MCP: Include branching logic for different session states"
+       - "MCP: Return structured result with planning algorithm and process options"
+
+# === WORKFLOW EXECUTION PATTERN ===
+workflowPattern:
+  purpose: "Standard execution cycle that repeats until goal achievement"
+  
+  cyclicalNature:
+    description: "Workflow runs in continuous cycles, designed for persistent execution"
+    principle: "Each cycle ends with planning next cycle, creating infinite loop until goal achieved"
+    terminationCondition: "Only stops when qualityAssurance process confirms goal completion"
+  
+  standardCycle:
+    steps:
+      1: "Process execution (runSessionIteration)"
+      2: "State update (updateSession - called automatically within runSessionIteration)"
+      3: "Next iteration planning (planSessionIteration - called automatically within runSessionIteration)"
+      4: "Cycle repetition (following planSessionIteration instructions)"
+    
+    flowControl:
+      normal: "runSessionIteration → updateSession → planSessionIteration → runSessionIteration"
+      uncertainty: "planSessionIteration → clarifySession → runSessionIteration → updateSession → planSessionIteration"
+      completion: "planSessionIteration → runSessionIteration({processes: ['qualityAssurance']}) → [potential termination]"
+  
+  keyProcesses:
+    qualityAssurance:
+      role: "Final validation process that can terminate workflow"
+      location: "Must be defined in config.yaml"
+      trigger: "When planSessionIteration determines goal is achieved"
+      
+    codeImplementation:
+      role: "Main implementation process for actual development work"
+      location: "Must be defined in config.yaml"
+      trigger: "When planSessionIteration determines sufficient information available"
+
+# === INTEGRATION REQUIREMENTS ===
+integration:
+  purpose: "Requirements for system components integration"
+  
+  configYaml:
+    requiredProcesses:
+      - "qualityAssurance: Final validation and potential workflow termination"
+      - "codeImplementation: Main development implementation process"
+      - "Additional processes as needed for specific workflow domains"
+    
+    processStructure:
+      required: ["purpose", "prompt"]
+      purpose: "Single sentence describing process goal"
+      prompt: "Multi-line execution instructions for LLM"
+  
+  coreYaml:
+    requiredPrompts:
+      - "updateSession: Algorithm for session state updating"
+      - "clarifySession: Template for uncertainty resolution"
+    
+    promptStructure:
+      format: "Multi-line algorithmic instructions"
+      target: "LLM execution guidance"
+      
+  sessionFiles:
+    format: "LAML (Labeled Markup Language)"
+    structure: "Goals, progress tracking"
+    updateMechanism: "Modified through updateSession prompt execution"
