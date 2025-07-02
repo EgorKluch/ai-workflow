@@ -100,6 +100,7 @@ tools:
           description: "Unified execution algorithm prompt for LLM"
           algorithmContent:
             - "LLM: Execute all specified processes using their prompts provided by MCP"
+            - "LLM: CRITICAL: Follow each process's HOW TO RESPOND format exactly (bullet points, markdown bold, max 5 lines each)"
             - "LLM: Apply context filtering if context parameter provided"
             - "LLM: After execution completion, call updateSession() to get session update procedure"
             - "LLM: Execute the session update procedure to analyze and save progress"
@@ -115,16 +116,17 @@ tools:
      
       algorithm:
        - "MCP: Load process definitions from config.yaml for specified process names"
-       - "MCP: Prepare unified execution prompt with process instructions"
+       - "MCP: Prepare unified execution prompt with process instructions and response requirements"
+       - "MCP: Include critical response requirements ensuring HOW TO RESPOND format compliance"
        - "MCP: Include context guidance if context parameter provided"
        - "MCP: Add mandatory updateSession() + planSessionIteration() call sequence to prompt"
        - "MCP: Return structured result with prompt, context, and process definitions"
 
   updateSession:
-    purpose: "Return prompt for session state update procedure with critical blocker management"
+    purpose: "Return prompt for session state update procedure with critical blocker management and structural guidance"
     signature: "updateSession()"
     toolType: "promptReturningTools"
-    description: "Provides algorithmic prompt for intelligent session content actualization with automatic critical blocker management and information prioritization"
+    description: "Provides algorithmic prompt for intelligent session content actualization with automatic critical blocker management, information prioritization, and session structure recommendations"
     
     inputData:
       none: "No input parameters required - LLM determines what to update based on session analysis"
@@ -133,21 +135,23 @@ tools:
       success:
         prompt:
           type: "string"
-          description: "Algorithm prompt for session update procedure with blocker management"
+          description: "Algorithm prompt for session update procedure with blocker management and structural guidance"
           source: "core.yaml configuration file"
           algorithmContent: 
             - "LLM: Apply INFORMATION CLASSIFICATION FRAMEWORK (IMMUTABLE, EVOLVING, CONSOLIDATABLE, EXPENDABLE)"
-            - "LLM: Manage critical blockers identified by planning process"
-            - "LLM: Update onReview section with critical items requiring resolution"
+            - "LLM: Apply RECOMMENDED SESSION STRUCTURE with logical organization"
+            - "LLM: Manage critical blockers using blockers.needToUserApprove and blockers.needToClarify structure"
+            - "LLM: Update session sections according to classification framework"
             - "LLM: Apply semantic consolidation to reduce redundancy while preserving critical context"
             - "LLM: Resolve contradictions using established resolution strategy"
             - "LLM: Mark implementation steps as blocked if dependent on unresolved critical items"
-            - "LLM: Save actualized session file with improved clarity and density"
+            - "LLM: Save actualized session file with improved clarity and recommended structure"
+            - "LLM: Provide structural recommendations for session organization"
     
       algorithm:
        - "MCP: Read session update prompt from core.yaml"
-       - "MCP: Return comprehensive prompt including blocker management and information prioritization"
-       - "MCP: LLM will analyze session content and manage blockers autonomously"
+       - "MCP: Return comprehensive prompt including blocker management, structural guidance, and information prioritization"
+       - "MCP: LLM will analyze session content, apply recommended structure, and manage blockers autonomously"
 
   getSessionProcesses:
     purpose: "Return available processes from config.yaml"
@@ -213,7 +217,7 @@ tools:
     purpose: "Analyze session state, detect critical blockers, and determine next workflow steps with comprehensive blocker resolution"
     signature: "planSessionIteration()"
     toolType: "promptReturningTools"
-    description: "Strategic planning tool that determines next workflow steps based on session progress and critical blocker analysis"
+    description: "Strategic planning tool that determines next workflow steps based on session progress and critical blocker analysis as the SOLE blocker detection mechanism"
     
     inputData:
       none: "No input parameters - LLM uses session path from context"
@@ -226,8 +230,8 @@ tools:
           algorithmContent:
             - "LLM: Read session file and parse session goal to determine success criteria"
             - "LLM: Evaluate current progress against goal requirements by analyzing session content" 
-            - "LLM: CRITICAL: Detect and analyze critical blockers using established detection algorithm"
-            - "LLM: Classify blockers as USER_DECISION_REQUIRED or CLARIFY_RESOLVABLE"
+            - "LLM: CRITICAL: Detect and analyze critical blockers using enhanced detection algorithm as SOLE blocker detection mechanism"
+            - "LLM: Classify blockers as USER_DECISION_REQUIRED (blockers.needToUserApprove) or CLARIFY_RESOLVABLE (blockers.needToClarify)"
             - "LLM: If session goal fully achieved: execute runSessionIteration({processes: ['qualityAssurance']})"
             - "LLM: If USER_DECISION_REQUIRED blockers found: stop progress, request user decisions"
             - "LLM: If CLARIFY_RESOLVABLE blockers found: call clarifySession({context: blocker description})"
@@ -239,7 +243,7 @@ tools:
     
       algorithm:
        - "MCP: Get available processes via getSessionProcesses()"
-       - "MCP: Prepare strategic planning prompt with critical blocker detection logic"
+       - "MCP: Prepare strategic planning prompt with enhanced critical blocker detection logic"
        - "MCP: Include decision tree with blocker classification and resolution paths"
        - "MCP: Return structured result with planning algorithm and process options"
 
@@ -267,12 +271,6 @@ workflowPattern:
       completion: "planSessionIteration → runSessionIteration({processes: ['qualityAssurance']}) → [potential termination]"
   
   keyProcesses:
-    blockerAnalysis:
-      role: "Specialized blocker detection and classification process"
-      location: "Must be defined in config.yaml"
-      trigger: "When systematic blocker analysis is needed beyond planSessionIteration detection"
-      purpose: "Systematically identify and classify critical blockers preventing session progress with resolution strategies"
-      
     qualityAssurance:
       role: "Final validation process that can terminate workflow"
       location: "Must be defined in config.yaml"
@@ -285,40 +283,47 @@ workflowPattern:
 
 # === BLOCKER SYSTEM ===
 blockerSystem:
-  purpose: "Critical blocker detection, classification, and resolution system integrated into workflow"
+  purpose: "Critical blocker detection, classification, and resolution system integrated into workflow with logical session structure"
   
+  sessionStructure:
+    description: "Structured approach to blocker management using logical session organization"
+    blockerFormat:
+      needToUserApprove: "Business decisions, scope changes, architectural choices requiring user consultation"
+      needToClarify: "Technical details, non-critical ambiguities, implementation questions resolvable through analysis"
+    
   blockerTypes:
     description: "Classification system for critical blockers that prevent session progress"
     categories:
       USER_DECISION_REQUIRED:
         description: "Blockers requiring business decisions from user"
+        sessionLocation: "blockers.needToUserApprove"
         examples:
-          - "Elements in onReview section affecting core functionality"
-          - "Conflicting requirements needing business decision"
-          - "Scope boundary changes requiring approval"
-          - "Architecture decisions with business impact"
+          - "Business decision required: [description] - Impact: [consequences]"
+          - "Scope change needed: [description] - Approval: [what user must decide]"
+          - "Architecture decision with business impact requiring approval"
         resolution: "User consultation and explicit decision"
         
       CLARIFY_RESOLVABLE:
         description: "Blockers that can be resolved through analysis or clarification"
+        sessionLocation: "blockers.needToClarify"
         examples:
-          - "Technical implementation details needing clarification"
-          - "Non-critical requirement ambiguities"
-          - "Process or workflow questions"
-          - "Technical option selections with clear trade-offs"
+          - "Technical question: [description] - Context: [why needed]"
+          - "Implementation approach: [description] - Options: [alternatives]"
+          - "Non-critical requirement ambiguities with clear resolution paths"
         resolution: "Automated analysis via clarifySession process"
   
   detectionAlgorithm:
-    responsibility: "planSessionIteration process performs critical blocker detection"
+    responsibility: "planSessionIteration process performs critical blocker detection as SOLE detection mechanism"
     methodology:
-      1: "Scope Analysis - Check unresolved elements in onReview section"
-      2: "Requirement Conflicts - Identify contradictory or ambiguous requirements"
-      3: "Technical Dependencies - Find critical technical decisions without resolution"
-      4: "Implementation Blockers - Identify architectural or dependency issues"
+      1: "Systematic Session Analysis - Parse all sections for potential blockers"
+      2: "Cross-Reference Analysis - Check for conflicting information across sections"
+      3: "Implementation Readiness - Assess if sufficient information for implementation"
+      4: "Risk Assessment - Identify high-risk decisions needing user input"
     
   managementWorkflow:
-    detection: "planSessionIteration identifies and classifies blockers"
-    preservation: "updateSession manages and preserves blocker context"
+    detection: "planSessionIteration identifies and classifies blockers using integrated detection algorithm"
+    preservation: "updateSession manages, preserves blocker context, and provides structural guidance"
+    structuralGuidance: "updateSession provides recommendations for logical session file organization"
     resolution: "clarifySession handles CLARIFY_RESOLVABLE blockers via user consultation"
     escalation: "USER_DECISION_REQUIRED blockers stop progress until user provides decisions"
     
@@ -326,6 +331,8 @@ blockerSystem:
     principle: "Blockers override progress assumptions and force resolution before continuation"
     priority: "Blocker resolution takes precedence over feature implementation"
     safety: "No implementation proceeds while critical blockers remain unresolved"
+    structure: "Blockers organized in logical session structure with top-level sections for better classification and management"
+    classification: "Session organized by immutable, evolving, consolidatable, expendable sections to guide updateSession processing"
 
 # === INTEGRATION REQUIREMENTS ===
 integration:
@@ -333,7 +340,6 @@ integration:
   
   configYaml:
     requiredProcesses:
-      - "blockerAnalysis: Specialized blocker detection and classification process"
       - "qualityAssurance: Final validation and potential workflow termination"
       - "codeImplementation: Main development implementation process"
       - "Additional processes as needed for specific workflow domains"
@@ -345,15 +351,18 @@ integration:
   
   coreYaml:
     requiredPrompts:
-      - "updateSession: Algorithm for session state updating with critical blocker management and information prioritization"
+      - "updateSession: Algorithm for session state updating with critical blocker management, information prioritization, and structural guidance"
       - "clarifySession: Template for uncertainty resolution through user consultation and strategic process execution"
-      - "planSessionIteration: Strategic planning with critical blocker detection and workflow decision logic"
+      - "planSessionIteration: Strategic planning with enhanced critical blocker detection and workflow decision logic"
+      - "runSessionIteration: Template for unified execution with response format compliance requirements"
     
     promptStructure:
       format: "Multi-line algorithmic instructions"
       target: "LLM execution guidance"
+      responseFormat: "MUST include HOW TO RESPOND format enforcement for structured output compliance"
       
   sessionFiles:
     format: "LAML (Labeled Markup Language)"
-    structure: "Goals, progress tracking"
-    updateMechanism: "Modified through updateSession prompt execution"
+    structure: "Logical organization with immutable, evolving, consolidatable, expendable top-level sections and structured blocker management"
+    updateMechanism: "Modified through updateSession prompt execution with structural recommendations based on INFORMATION CLASSIFICATION FRAMEWORK"
+    organizationPrinciple: "Top-level sections (immutable, evolving, consolidatable, expendable) provide clear guidance for session update processing"

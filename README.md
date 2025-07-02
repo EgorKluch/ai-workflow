@@ -261,10 +261,11 @@ The server implements a cyclical workflow execution pattern with critical blocke
 ### Key Processes
 
 The system requires these processes in `config/config.yaml`:
-- **blockerAnalysis**: Specialized blocker detection and classification process
 - **qualityAssurance**: Final validation process that can terminate workflow
 - **codeImplementation**: Main development implementation process
 - Additional domain-specific processes as needed
+
+**Note**: Blocker detection is integrated directly into `planSessionIteration` as the sole blocker detection mechanism, eliminating the need for a separate `blockerAnalysis` process.
 
 ### Adding New Processes
 
@@ -342,22 +343,62 @@ The system includes automatic detection and classification of critical blockers 
 3. **Progress Control**: Implementation is blocked until critical issues are resolved
 4. **User Consultation**: Critical blockers trigger user decision requests via `clarifySession`
 
-### Example Scenario
+### Session Structure with Blocker Management
 
 ```yaml
-# Session file with critical blocker
-scopeBoundaries:
-  inScope:
-    - User authentication system
-    - Basic user profile management
-  outOfScope:  
-    - Advanced user analytics
-    - Third-party integrations
-  onReview:
-    - Password reset functionality  # BLOCKS core auth system
-    - Profile picture upload      # Non-critical, can proceed without
+# Recommended logical session structure
+goal: "Implement user authentication system"
+
+# IMMUTABLE sections (preserved exactly)
+immutable:
+  scopeBoundaries:
+    inScope: "User authentication system, Basic user profile management"
+    outOfScope: "Advanced user analytics, Third-party integrations"
+
+  userDecisions: "No information"
+  constraints: "No information"
+  successCriteria: "No information"
+  architecturalDecisions: "No information"
+
+# EVOLVING sections (updated with current state)
+evolving:
+  technicalContext:
+    currentArchitecture: "Node.js + React + PostgreSQL"
+    patterns: "service layer, event-driven architecture"
+    dependencies: "existing auth system"
+
+  requirements:
+    functional: "login, logout, profile management"
+    nonFunctional: "security, performance"
+
+  progressState:
+    completed: []
+    inProgress: 
+      - "authentication analysis"
+    pending: 
+      - "implementation"
+
+  analysisResults: "No information"
+
+# BLOCKER MANAGEMENT (special handling)
+blockers:
+  needToUserApprove:
+    - "Business decision required: Password reset functionality - Impact: affects core auth system security"
+    - "Scope change needed: Social login integration - Approval: expand scope or defer to future"
+  needToClarify:
+    - "Technical question: Hashing algorithm selection - Context: security compliance requirements"
+    - "Implementation approach: Session management strategy - Options: JWT vs server-side sessions"
+
+# CONSOLIDATABLE sections (merge similar content)
+consolidatable:
+  implementationNotes: "No information"
+
+# EXPENDABLE sections (can become obsolete)
+expendable:
+  workingNotes: "No information"
+  debugInfo: []
 ```
 
 **System Response**:
-- **BLOCKED**: Password reset functionality affects core authentication - USER_DECISION_REQUIRED
-- **PROCEED**: Profile picture upload is non-critical - can be resolved later 
+- **BLOCKED**: Password reset and social login require user decisions (needToUserApprove)
+- **AUTOMATED**: Technical questions resolved through clarifySession (needToClarify) 

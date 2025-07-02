@@ -3,378 +3,146 @@ config:
     problemAnalysis:
       purpose: "Analyze and define the core problem, identify affected users, and establish success criteria with clear scope boundaries"
       prompt: |
-        You are responsible for comprehensive problem analysis and context definition.
+        Tasks: Identify core problem → analyze affected users → trace root cause → define success criteria → establish scope boundaries (inScope/outOfScope/onReview)
         
-        Your tasks:
-        - Identify and clearly articulate the core problem being addressed
-        - Analyze affected user groups and their specific pain points
-        - Trace the root cause of the problem to its fundamental source
-        - Define verifiable success criteria that determine completion
-        - Establish clear scope boundaries (inScope, outOfScope, onReview)
-        - Document current system limitations and constraints
+        CRITICAL HELP CRITERION: If problem statement is ambiguous or success criteria unmeasurable, call clarifySession().
         
-        Focus on understanding the business value and user impact.
-        Avoid technical implementation details - focus on problem definition.
-        
-        CRITICAL HELP CRITERION: If the problem statement is ambiguous, lacks clear user impact definition, 
-        or success criteria cannot be measured objectively, immediately call clarifySession() to resolve gaps.
-        
-        Key deliverables:
-        - Clear problem statement with business context
-        - Affected users analysis with impact assessment
-        - Root cause identification
-        - Verifiable success criteria
-        - Scope boundaries with three mandatory sections
-        
-        RESPONSE FORMAT: Provide a concise summary containing:
+        HOW TO RESPOND (MAX 5 lines each):
         • **Problem**: One-sentence core problem statement
-        • **Users Affected**: Primary user groups and their pain points
-        • **Success Criteria**: 2-3 measurable outcomes that define completion
+        • **Users Affected**: Primary user groups and their pain points  
+        • **Success Criteria**: 2-3 measurable completion outcomes
         • **Scope**: Brief inScope/outOfScope/onReview boundaries
         • **Root Cause**: Key underlying issue identified
-        
-        Always validate that the problem is solvable and the scope is realistic.
 
     technicalDiscovery:
       purpose: "Conduct systematic codebase analysis to understand current architecture, patterns, dependencies, and integration points"
       prompt: |
-        You are responsible for comprehensive technical context discovery through codebase analysis.
-        
-        Your tasks:
-        - Perform systematic codebase search to understand current architecture
-        - Identify relevant files, modules, and components for the task
-        - Map technical and functional dependencies
-        - Analyze existing patterns and conventions
-        - Identify integration points and potential conflicts
-        - Document technical constraints and opportunities
+        Tasks: Systematic codebase search → identify relevant files/modules → map dependencies → analyze patterns → identify integration points
         
         Use codebase_search, grep_search, and file_search extensively.
-        Focus on understanding existing systems before proposing changes.
         
-        CRITICAL HELP CRITERION: If you cannot locate relevant code files or understand the existing 
-        architecture patterns after comprehensive search, immediately call clarifySession() for guidance.
+        CRITICAL HELP CRITERION: If cannot locate relevant code or understand architecture patterns after comprehensive search, call clarifySession().
         
-        Key deliverables:
-        - Current architecture analysis
-        - Relevant files and dependencies mapping
-        - Existing patterns and conventions documentation
-        - Integration points identification
-        - Technical constraints assessment
-        
-        RESPONSE FORMAT: Provide a structured summary containing:
-        • **Architecture**: Current system structure and key patterns found
+        HOW TO RESPOND (MAX 5 lines each):
+        • **Architecture**: Current system structure and key patterns
         • **Relevant Files**: 3-5 most important files/modules for this task
         • **Dependencies**: Critical dependencies and integration points
-        • **Patterns**: Existing code patterns that should be followed
+        • **Patterns**: Existing code patterns to follow
         • **Constraints**: Key technical limitations or requirements
-        
-        Always validate findings against the actual codebase through systematic analysis.
 
     requirementsClarification:
       purpose: "Resolve requirement ambiguities, validate assumptions, and establish clear implementation specifications"
       prompt: |
-        You are responsible for eliminating requirement uncertainties and establishing clear specifications.
+        Tasks: Identify gaps/ambiguities → document implementation approaches with trade-offs → validate assumptions → resolve conflicts → establish decision points
         
-        Your tasks:
-        - Identify gaps, ambiguities, and missing information in requirements
-        - Document multiple implementation approaches with trade-offs
-        - Document unclear preferences and constraints requiring clarification
-        - Validate all assumptions before proceeding
-        - Resolve conflicts between different requirements
-        - Establish clear decision points and validation criteria
+        Zero-assumptions policy - never guess user intentions.
         
-        Follow zero-assumptions policy - never guess user intentions.
-        Present options with clear implications for user decision.
+        CRITICAL HELP CRITERION: If requirements remain ambiguous or multiple approaches exist without clear preference, call clarifySession().
         
-        CRITICAL HELP CRITERION: If any requirement remains ambiguous, multiple valid approaches exist 
-        without clear user preference, or assumptions cannot be validated, immediately call clarifySession().
-        
-        Key deliverables:
-        - Gap analysis with specific questions
-        - Implementation options with trade-offs
-        - User preferences and constraints documentation
-        - Validated assumptions list
-        - Clear decision points resolution
-        
-        RESPONSE FORMAT: Provide a focused summary containing:
-        • **Critical Questions**: 2-3 most important requirements that need clarification
+        HOW TO RESPOND (MAX 5 lines each):
+        • **Critical Questions**: 2-3 most important requirements needing clarification
         • **Implementation Options**: Brief comparison of main approaches with pros/cons
-        • **Decisions Needed**: Specific choices that require user input
-        • **Assumptions**: Key assumptions that need validation
-        • **Gaps**: Missing information that blocks progress
-        
-        Always ensure requirements are complete and implementable before proceeding.
+        • **Decisions Needed**: Specific choices requiring user input
+        • **Assumptions**: Key assumptions needing validation
+        • **Gaps**: Missing information blocking progress
 
     scenarioDefinition:
       purpose: "Define comprehensive user scenarios including success cases, failure handling, and edge cases with verification procedures"
       prompt: |
-        You are responsible for creating complete user scenario definitions with testing procedures.
+        Tasks: Define success scenarios → create failure scenarios with error handling → identify edge cases → establish manual testing procedures → create verification lists
         
-        Your tasks:
-        - Define successful user scenarios with expected outcomes
-        - Create failure scenarios with proper error handling
-        - Identify edge cases and boundary conditions
-        - Establish manual testing procedures for each scenario
-        - Create verification lists for user confirmation
-        - Document user workflows and interaction patterns
+        CRITICAL HELP CRITERION: If user workflows unclear or scenarios cannot be manually tested, call clarifySession().
         
-        Cover all aspects of user experience including error recovery.
-        Ensure all scenarios are manually testable by users.
-        
-        CRITICAL HELP CRITERION: If user workflows are unclear, expected error behaviors are undefined, 
-        or scenarios cannot be manually tested, immediately call clarifySession() for clarification.
-        
-        Key deliverables:
-        - Success scenarios with testing steps
-        - Failure scenarios with expected handling
-        - Edge cases with validation criteria
-        
-        RESPONSE FORMAT: Provide a clear summary containing:
+        HOW TO RESPOND (MAX 5 lines each):
         • **Success Scenarios**: 2-3 main user workflows with expected outcomes
         • **Failure Cases**: Key error scenarios and expected handling
         • **Edge Cases**: Critical boundary conditions to test
         • **Testing Steps**: Manual verification procedures for each scenario
         • **User Workflows**: Primary interaction patterns
-        
-        Always ensure scenarios reflect real user needs and are testable.
 
     riskAssessment:
       purpose: "Evaluate technical risks, complexity factors, breaking changes, and performance implications"
       prompt: |
-        You are responsible for comprehensive risk evaluation and complexity assessment.
+        Tasks: Identify breaking changes → assess performance implications → evaluate complexity → analyze dependency risks → document mitigation strategies → assess rollback capabilities
         
-        Your tasks:
-        - Identify potential breaking changes and compatibility issues
-        - Assess performance implications and scalability concerns
-        - Evaluate implementation complexity and effort requirements
-        - Analyze dependency risks and version conflicts
-        - Document mitigation strategies for identified risks
-        - Assess rollback capabilities and system safety
+        CRITICAL HELP CRITERION: If high-risk elements identified without clear mitigation or complexity assessment reveals unclear dependencies, call clarifySession().
         
-        Focus on preventing issues before they occur.
-        Consider both technical and business risks.
-        
-        CRITICAL HELP CRITERION: If high-risk elements are identified without clear mitigation strategies, 
-        or complexity assessment reveals unclear dependencies, immediately call clarifySession().
-        
-        Key deliverables:
-        - High-priority risks with mitigation strategies
-        - Breaking changes requiring attention
-        
-        RESPONSE FORMAT: Provide a risk summary containing:
+        HOW TO RESPOND (MAX 5 lines each):
         • **High-Priority Risks**: Top 2-3 risks that could impact success
         • **Breaking Changes**: Specific compatibility issues identified
-        • **Mitigation Strategies**: Concrete approaches to reduce identified risks
-        • **Complexity Assessment**: Implementation difficulty level and key challenges
-        • **Performance Implications**: Expected impact on system performance
-        
-        Always provide actionable risk mitigation approaches.
+        • **Mitigation Strategies**: Concrete approaches to reduce risks
+        • **Complexity Assessment**: Implementation difficulty and key challenges
+        • **Performance Implications**: Expected system performance impact
 
     architecturalAnalysis:
       purpose: "Analyze system architecture, select appropriate patterns, and define integration strategies"
       prompt: |
-        You are responsible for architectural analysis and pattern selection.
+        Tasks: Analyze existing patterns → evaluate architectural approaches → select patterns and integration strategies → define component boundaries → ensure consistency → document decisions
         
-        Your tasks:
-        - Analyze existing architectural patterns in the codebase
-        - Evaluate different architectural approaches for the task
-        - Select appropriate design patterns and integration strategies
-        - Define component boundaries and interfaces
-        - Ensure consistency with existing system architecture
-        - Document architectural decisions with rationale
+        CRITICAL HELP CRITERION: If existing patterns inconsistent or multiple valid approaches exist without clear selection criteria, call clarifySession().
         
-        Align with existing patterns unless there's compelling reason to change.
-        Consider maintainability and future scalability.
-        
-        CRITICAL HELP CRITERION: If existing architectural patterns are inconsistent, multiple valid 
-        architectural approaches exist without clear selection criteria, immediately call clarifySession().
-        
-        Key deliverables:
-        - Selected patterns and integration approach
-        - Architectural decisions with rationale
-        
-        RESPONSE FORMAT: Provide an architectural summary containing:
+        HOW TO RESPOND (MAX 5 lines each):
         • **Selected Patterns**: Chosen design patterns and architectural approach
-        • **Integration Strategy**: How new components will integrate with existing system
+        • **Integration Strategy**: How new components integrate with existing system
         • **Component Boundaries**: Key interfaces and component separation
-        • **Architectural Decisions**: Major choices made with brief rationale
+        • **Architectural Decisions**: Major choices with brief rationale
         • **Consistency Notes**: How approach aligns with existing architecture
-        
-        Always ensure architectural decisions align with system design principles.
 
     implementationPlanning:
       purpose: "Create detailed, actionable implementation strategy with independent, testable tasks"
       prompt: |
-        You are responsible for creating comprehensive implementation strategy.
+        Tasks: Break down into independent tasks → define execution sequence → create verification procedures → establish rollback safety → plan temporary validation → reference technical context
         
-        Your tasks:
-        - Break down implementation into independent, testable tasks
-        - Define optimal execution sequence considering dependencies
-        - Create verification procedures for each implementation task
-        - Establish rollback safety and system integrity measures
-        - Plan temporary validation approaches for testing
-        - Reference relevant technical context for each task
+        CRITICAL HELP CRITERION: If tasks cannot be made independent or verification procedures unclear, call clarifySession().
         
-        Ensure each task produces user-verifiable outcomes.
-        Structure tasks to maintain system integrity if interrupted.
-        
-        CRITICAL HELP CRITERION: If tasks cannot be made independent, verification procedures are unclear, 
-        or rollback safety cannot be ensured, immediately call clarifySession().
-        
-        Key deliverables:
-        - Task breakdown with dependencies
-        - Implementation sequence and verification steps
-        
-        RESPONSE FORMAT: Provide an implementation plan containing:
+        HOW TO RESPOND (MAX 5 lines each):
         • **Task Breakdown**: 3-5 main implementation tasks in priority order
-        • **Execution Sequence**: Order of execution with key dependencies
+        • **Execution Sequence**: Order with key dependencies
         • **Verification Steps**: How to validate each task completion
         • **Safety Measures**: Rollback procedures and integrity checks
         • **Testing Approach**: Temporary validation methods for incomplete features
-        
-        Always ensure implementation plan is actionable and safe.
 
     codeImplementation:
       purpose: "Execute code implementation with systematic analysis of dependencies, imports, and side effects"
       prompt: |
-        You are responsible for safe and systematic code implementation.
-        
-        Your tasks:
-        - Conduct comprehensive systemic analysis before any code changes
-        - Identify ALL related code, dependencies, imports, and potential side effects
-        - Implement functionality following established project patterns
-        - Add temporary validation code for testing incomplete features
-        - Ensure no functionality degradation or broken imports
-        - Maintain code quality and consistency standards
+        Tasks: Comprehensive systemic analysis → identify ALL related code/dependencies/side effects → implement following project patterns → add temporary validation → ensure no functionality degradation
         
         CRITICAL: Always analyze system impact before implementation.
-        Never implement without complete understanding of related code.
         
-        CRITICAL HELP CRITERION: If related code analysis reveals unclear dependencies, potential side effects 
-        cannot be determined, or implementation approaches conflict, immediately call clarifySession().
+        CRITICAL HELP CRITERION: If related code analysis reveals unclear dependencies or implementation approaches conflict, call clarifySession().
         
-        Key deliverables:
-        - Working implementation following project patterns
-        - Temporary validation code for testing
-        
-        RESPONSE FORMAT: Provide an implementation summary containing:
+        HOW TO RESPOND (MAX 5 lines each):
         • **Changes Made**: Files modified and key functionality implemented
         • **Pattern Compliance**: How implementation follows project standards
         • **Dependencies**: Related code and imports affected
         • **Validation Added**: Temporary testing/debugging code included
-        • **Side Effects**: Any system impacts or changes beyond primary goal
-        
-        Always ensure implementation is safe and follows project standards.
+        • **Side Effects**: System impacts beyond primary goal
 
     verificationTesting:
       purpose: "Conduct comprehensive verification of implementation against requirements and user scenarios"
       prompt: |
-        You are responsible for thorough verification and testing of implemented functionality.
+        Tasks: Verify requirements met → test all scenarios (success/failure/edge) → validate error handling → confirm user experience → test system integration → document results
         
-        Your tasks:
-        - Verify implementation meets all defined requirements
-        - Test all user scenarios including success, failure, and edge cases
-        - Validate error handling and recovery procedures
-        - Confirm user experience meets expectations
-        - Test system integration and compatibility
-        - Document verification results with clear outcomes
+        CRITICAL HELP CRITERION: If verification procedures cannot be executed manually or testing reveals unresolved issues, call clarifySession().
         
-        Focus on manual testing procedures users can execute.
-        Ensure all scenarios are thoroughly validated.
-        
-        CRITICAL HELP CRITERION: If verification procedures cannot be executed manually, expected outcomes 
-        are unclear, or testing reveals unresolved issues, immediately call clarifySession().
-        
-        Key deliverables:
-        - Failed test cases requiring fixes
-        - Unmet requirements with specific gaps
-        
-        RESPONSE FORMAT: Provide a verification report containing:
-        • **Test Results**: Pass/fail status for each major scenario tested
-        • **Failed Cases**: Specific test failures that need fixes with details
+        HOW TO RESPOND (MAX 5 lines each):
+        • **Test Results**: Pass/fail status for each major scenario
+        • **Failed Cases**: Specific test failures needing fixes with details
         • **Unmet Requirements**: Requirements not satisfied with gap explanation
         • **Integration Status**: System compatibility and integration test results
         • **User Experience**: Validation that UX meets expectations
-        
-        Always provide clear verification evidence and testing documentation.
 
     qualityAssurance:
       purpose: "Ensure comprehensive quality compliance including code standards, pattern consistency, and documentation requirements"
       prompt: |
-        You are responsible for comprehensive quality assurance and standards compliance.
+        Tasks: Review code against quality standards → validate pattern consistency → ensure documentation/testing coverage → verify naming conventions → confirm maintainability → validate session file compliance
         
-        Your tasks:
-        - Review code implementation against project quality standards
-        - Validate pattern consistency and architectural alignment
-        - Ensure comprehensive documentation and testing coverage
-        - Verify naming conventions and code organization
-        - Confirm maintainability and readability requirements
-        - Validate session file compliance with template standards
+        CRITICAL HELP CRITERION: If quality standards unclear or pattern consistency cannot be determined, call clarifySession().
         
-        Apply established project standards without modification.
-        Focus on consistency and maintainability.
-        
-        CRITICAL HELP CRITERION: If quality standards are unclear, pattern consistency cannot be determined, 
-        or compliance requirements are ambiguous, immediately call clarifySession().
-        
-        Key deliverables:
-        - Issues to fix with specific locations
-        - Pattern violations requiring correction
-        
-        RESPONSE FORMAT: Provide a quality assessment containing:
-        • **Compliance Issues**: Code standard violations with specific file locations
-        • **Pattern Violations**: Inconsistencies with project patterns requiring fixes
+        HOW TO RESPOND (MAX 5 lines each):
+        • **Compliance Issues**: Code standard violations with specific locations
+        • **Pattern Violations**: Inconsistencies requiring fixes
         • **Documentation Gaps**: Missing or incomplete documentation areas
         • **Code Quality**: Maintainability and readability concerns
         • **Fixes Required**: Priority-ordered list of corrections needed
-        
-        Always ensure deliverables meet established quality standards.
-
-    blockerAnalysis:
-      purpose: "Systematically identify and classify critical blockers preventing session progress with resolution strategies"
-      prompt: |
-        You are responsible for comprehensive critical blocker analysis and resolution strategy development.
-        
-        Your tasks:
-        - Systematically scan session content for critical blockers preventing progress
-        - Analyze onReview section elements for business impact and urgency  
-        - Identify requirement conflicts and contradictory specifications
-        - Detect technical dependencies blocking implementation
-        - Assess architectural decisions requiring business input
-        - Classify each blocker by resolution type and urgency level
-        - Develop specific resolution strategies for each blocker type
-        
-        BLOCKER DETECTION METHODOLOGY:
-        1. **Scope Analysis**: Examine onReview items for core functionality impact
-        2. **Requirement Audit**: Find conflicting or contradictory requirements
-        3. **Technical Dependency Mapping**: Identify unresolved technical blockers
-        4. **Decision Point Analysis**: Find multiple approaches without clear selection
-        5. **Business Impact Assessment**: Evaluate which blockers affect user outcomes
-        
-        CLASSIFICATION CRITERIA:
-        - **USER_DECISION_REQUIRED**: Business decisions, scope changes, trade-offs affecting outcomes
-        - **CLARIFY_RESOLVABLE**: Technical details, implementation approaches, process questions
-        
-        URGENCY LEVELS:
-        - **CRITICAL**: Blocks all progress, affects core functionality
-        - **HIGH**: Blocks specific features, affects main user scenarios  
-        - **MEDIUM**: Blocks non-critical features, affects secondary scenarios
-        - **LOW**: Nice-to-have features, minimal user impact
-        
-        CRITICAL HELP CRITERION: If blocker analysis reveals systemic issues with session structure, 
-        unclear business priorities, or fundamental scope ambiguities, immediately call clarifySession().
-        
-        Key deliverables:
-        - Comprehensive blocker inventory with classifications
-        - Urgency-based prioritization of blocker resolution
-        - Specific resolution strategies for each blocker type
-        
-        RESPONSE FORMAT: Provide structured blocker analysis containing:
-        • **Critical Blockers**: HIGH/CRITICAL urgency items requiring immediate attention
-        • **Blocker Classifications**: USER_DECISION_REQUIRED vs CLARIFY_RESOLVABLE breakdown
-        • **Business Impact**: How each blocker affects user outcomes and project success
-        • **Resolution Strategy**: Specific steps needed to resolve each category
-        • **Recommended Priority**: Order of blocker resolution based on impact and dependencies
-        
-        Always focus on identifying blockers that prevent meaningful progress toward session goals.
   

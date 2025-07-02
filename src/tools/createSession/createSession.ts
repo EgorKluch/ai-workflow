@@ -42,11 +42,52 @@ export async function createSession(session: McpSession, args: CreateSessionRequ
       mkdirSync(sessionDir, { recursive: true });
     }
 
-    // Create new session file at sessionPath
+    // Create new session file at sessionPath with recommended structure
     const sessionTemplate = `# Session File
+goal: "No information" # User will provide goal here
 
-## Goal
-[User will provide goal here]
+# IMMUTABLE SECTIONS (preserve exactly, can expand)
+immutable:
+  scopeBoundaries:
+    inScope: "No information" # items explicitly in scope
+    outOfScope: "No information" # items explicitly out of scope
+  
+  userDecisions: "No information" # confirmed user choices and preferences
+  constraints: "No information" # technical, business, or resource limitations
+  successCriteria: "No information" # measurable completion outcomes
+  architecturalDecisions: "No information" # major technical architecture choices
+
+# EVOLVING SECTIONS (replace outdated content)
+evolving:
+  technicalContext:
+    currentArchitecture: "No information" # system structure overview
+    patterns: "No information" # coding patterns to follow
+    dependencies: "No information" # critical integrations and libraries
+  
+  requirements:
+    functional: "No information" # what system must do
+    nonFunctional: "No information" # performance, security, usability requirements
+  
+  progressState:
+    completed: []
+    inProgress: []
+    pending: []
+  
+  analysisResults: "No information" # key findings from various analyses
+
+# BLOCKER MANAGEMENT (special handling)
+blockers:
+  needToUserApprove: []
+  needToClarify: []
+
+# CONSOLIDATABLE SECTIONS (merge similar content)
+consolidatable:
+  implementationNotes: "No information" # important technical observations
+
+# EXPENDABLE SECTIONS (can become obsolete)
+expendable:
+  workingNotes: "No information" # temporary analysis and thoughts
+  debugInfo: []
 `;
 
     writeFileSync(fullSessionPath, sessionTemplate, 'utf8');

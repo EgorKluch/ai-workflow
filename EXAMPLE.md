@@ -9,8 +9,8 @@ User Request → createSession → planSessionIteration → runSessionIteration 
 
 **Key components:**
 - **MCP Tools**: createSession, planSessionIteration, runSessionIteration, updateSession, clarifySession
-- **Processes**: problemAnalysis, technicalDiscovery, codeImplementation, qualityAssurance, blockerAnalysis
-- **Blocker System**: Automatic detection of critical blockers
+- **Processes**: problemAnalysis, technicalDiscovery, codeImplementation, qualityAssurance
+- **Blocker System**: Integrated blocker detection in planSessionIteration with logical session structure
 - **Adaptive Control**: User involvement level depends on complexity
 
 ---
@@ -264,11 +264,11 @@ updateSession → planSessionIteration → qualityAssurance
 
 ## Key Workflow Patterns
 
-### 1. **Automatic Blocker Detection**
+### 1. **Integrated Blocker Detection**
 ```
 planSessionIteration → session analysis → blocker detection → classification:
-- USER_DECISION_REQUIRED: business decisions, architectural choices
-- CLARIFY_RESOLVABLE: technical details, process clarifications
+- USER_DECISION_REQUIRED → blockers.needToUserApprove: business decisions, architectural choices
+- CLARIFY_RESOLVABLE → blockers.needToClarify: technical details, process clarifications
 ```
 
 ### 2. **Adaptive Control**
