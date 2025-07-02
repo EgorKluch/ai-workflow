@@ -57,18 +57,13 @@ describe('SessionManagerMcpServer Integration Tests', () => {
   });
 
   it('should create SessionManagerMcpServer and test real tool execution', async () => {
-    console.log('Starting integration test for SessionManagerMcpServer');
-    
     const { SessionManagerMcpServer } = await import('../index.js');
     const server = new SessionManagerMcpServer();
     
     expect(server).toBeInstanceOf(SessionManagerMcpServer);
-    console.log('SessionManagerMcpServer created successfully');
   });
 
   it('should test basic tool handlers execution with McpSession', async () => {
-    console.log('Testing basic tool handlers with McpSession');
-    
     const session = new McpSession();
     
     // Test that McpSession can be created and has expected interface
@@ -76,26 +71,18 @@ describe('SessionManagerMcpServer Integration Tests', () => {
     expect(session.logger).toBeDefined();
     expect(typeof session.getResult).toBe('function');
     
-    console.log('McpSession created successfully');
-    
     // Test basic session result generation
     const testResult = session.getResult({ test: 'data' });
     expect(testResult).toBeDefined();
     expect(typeof testResult).toBe('object');
-    
-    console.log('Basic session operations tested');
   });
 
   it('should test integration patterns', async () => {
-    console.log('Testing integration patterns');
-    
     const { SessionManagerMcpServer } = await import('../index.js');
     const server = new SessionManagerMcpServer();
     
     // Test that server is properly constructed
     expect(server).toBeInstanceOf(SessionManagerMcpServer);
     expect(typeof server.run).toBe('function');
-    
-    console.log('Integration patterns verified');
   });
 }); 

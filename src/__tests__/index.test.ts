@@ -286,10 +286,6 @@ describe('Session Manager MCP Server', () => {
     const originalArgv = process.argv[1];
     const originalImportMetaUrl = import.meta.url;
     
-    console.log('Testing direct execution path coverage');
-    console.log('import.meta.url:', originalImportMetaUrl);
-    console.log('process.argv[1]:', originalArgv);
-    
     // The condition will be false in test environment, so we test the code paths exist
     expect(typeof originalImportMetaUrl).toBe('string');
     expect(typeof originalArgv).toBe('string');
@@ -313,17 +309,12 @@ describe('Session Manager MCP Server', () => {
 
     // Get all registered handlers
     const toolCalls = mockBuilderInstance.addTool.mock.calls;
-    
-    console.log('Testing handler execution for coverage');
-    console.log('Number of tools registered:', toolCalls.length);
 
     // Test basic handler execution paths
     for (const call of toolCalls) {
       const toolDef = call[0] as any;
       const handler = call[1] as any;
       const toolName = toolDef.name;
-      
-      console.log('Testing handler for tool:', toolName);
       
       // Verify handler is function
       expect(typeof handler).toBe('function');

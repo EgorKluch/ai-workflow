@@ -4,75 +4,272 @@
 core: 
   processes:
     clarifySession:
-      purpose: "Analyze information gaps based on problem context, recommend appropriate processes, and escalate to user if runIteration fails to resolve uncertainties"
+      purpose: "Resolve information gaps by first consulting user with clear questions, then executing targeted process iterations, and escalating only if automated resolution fails"
       prompt: |
-        You are responsible for resolving information gaps through strategic process selection and iteration management.
+        You are responsible for resolving information gaps through user consultation and strategic process execution.
         
-        REQUIRED INPUT: You receive a problem context that describes the specific issue or uncertainty that triggered the need for clarification.
+        REQUIRED INPUT: You receive a problem context describing the specific uncertainty that triggered clarification need.
         
         Your tasks:
-        - Analyze the provided problem context to understand the specific information gaps
-        - Determine which processes are most relevant for resolving the identified uncertainties
-        - Validate that selected processes make logical sense for the problem context
-        - Transform the problem context into actionable iteration context that guides resolution
-        - Execute runIteration with recommended processes and iteration context
-        - Evaluate whether runIteration resolved the critical uncertainties
-        - If uncertainties persist after iteration, escalate to user for direct clarification
+        - Analyze the problem context to identify specific information gaps and uncertainty types
+        - Formulate clear, specific questions for user consultation with context about why the information is needed
+        - Present user questions in structured format explaining what decision or action depends on their answer
+        - Process user responses and transform them into actionable iteration context
+        - Execute runIteration with appropriate processes based on user guidance and problem context
+        - Evaluate iteration results and determine if uncertainties are resolved
+        - If automated resolution fails after user consultation, escalate with explanation of attempted approaches
         
-        Context transformation:
-        - INPUT CONTEXT: Describes the problem/uncertainty that triggered clarifySession
-        - OUTPUT CONTEXT: Describes what needs to be done to solve the problem (for runIteration)
-        - Example: "Requirements are unclear" → "Analyze requirements and identify specific gaps"
+        User consultation guidelines:
+        - Ask specific questions that directly address the identified uncertainty
+        - Explain why the information is needed and what it will enable
+        - Provide context about the decision or action that depends on the answer
+        - Offer concrete options when appropriate to make answering easier
+        - Keep questions focused and avoid overwhelming the user with multiple topics
         
-        Process selection criteria:
-        - Processes must be logically relevant to the problem context
-        - Match process capabilities to the specific problem domain and type
-        - Prioritize processes that can directly address the identified problem type
+        Process execution:
+        - Select processes that align with user guidance and problem domain
+        - Transform user responses into clear iteration context for process execution
+        - Focus on processes most likely to resolve the specific uncertainty type
         
         Key deliverables:
-        - Recommended processes with logical relevance validation
-        - runIteration execution with appropriate parameters
-        - User escalation if iteration fails to resolve uncertainties
+        - Clear user consultation with specific questions and context
+        - Targeted process iteration based on user guidance
+        - Final resolution status with escalation if automated approaches fail
         
-        RESPONSE FORMAT: Provide a concise resolution summary containing:
-        • **Problem Identified**: Brief statement of the uncertainty or gap
-        • **Processes Selected**: 2-3 recommended processes with selection rationale
-        • **Iteration Context**: Transformed context for guiding process execution
-        • **Resolution Status**: Whether uncertainties were resolved or user escalation needed
-        • **Key Outcomes**: Main insights or decisions gained from iteration
+        RESPONSE FORMAT: Provide resolution summary containing:
+        • **Uncertainty Identified**: Specific gap or ambiguity requiring clarification
+        • **User Questions**: Clear, contextual questions with explanation of why information is needed
+        • **User Guidance Received**: Summary of user responses and how they inform next steps
+        • **Processes Executed**: Selected processes with rationale based on user guidance
+        • **Resolution Status**: Whether uncertainty resolved or requires further user involvement
         
-        Always ensure process selection and context transformation align with the specific problem described in input context.
+        Always prioritize user consultation before attempting automated resolution to ensure efficient problem-solving.
+
+    planSessionIteration:
+      purpose: "Analyze session state, detect critical blockers, and determine next workflow steps with comprehensive blocker resolution"
+      prompt: |
+        You are responsible for strategic planning that determines next workflow steps based on session progress and critical blocker analysis.
+
+        Your tasks:
+        - Read session file and parse session goal to determine success criteria
+        - Evaluate current progress against goal requirements by analyzing session content
+        - CRITICAL: Detect and analyze critical blockers that prevent progress continuation
+        - Classify blocker types and required resolution approaches
+        - If session goal is fully achieved: execute runSessionIteration({processes: ['qualityAssurance']})
+        - If critical blockers detected: determine resolution approach and block further progress
+        - If goal not achieved but no blockers: determine if implementation can begin or if information is missing
+        - If information missing: formulate description of missing information and call clarifySession({context: <description>})
+        - If information sufficient: execute runSessionIteration({processes: ['codeImplementation']})
+
+        CRITICAL BLOCKER DETECTION ALGORITHM:
+        1. **Scope Analysis**: Check for unresolved elements in onReview section
+        2. **Requirement Conflicts**: Identify contradictory or ambiguous requirements
+        3. **Technical Dependencies**: Find critical technical decisions without clear resolution
+        4. **Implementation Blockers**: Identify architectural or dependency issues preventing progress
+
+        BLOCKER CLASSIFICATION:
+        - **USER_DECISION_REQUIRED**: 
+          * Elements in onReview section that affect core functionality
+          * Conflicting requirements needing business decision
+          * Scope boundary changes requiring approval
+          * Architecture decisions with business impact
+        - **CLARIFY_RESOLVABLE**:
+          * Technical implementation details needing clarification
+          * Non-critical requirement ambiguities
+          * Process or workflow questions
+          * Technical option selections with clear trade-offs
+
+        DECISION TREE WITH BLOCKER INTEGRATION:
+        1. **Goal Achievement Check**: Is the session goal fully completed?
+           → Goal Complete: execute runSessionIteration({processes: ['qualityAssurance']})
+        
+        2. **Critical Blocker Analysis**: Are there unresolved critical blockers?
+           → USER_DECISION_REQUIRED blockers found: 
+             * Formulate clear user questions about specific blockers
+             * Explain business impact and decision urgency
+             * Stop further progress until user resolves blockers
+             * Output: "BLOCKED: User decision required for: [specific blockers list]"
+           
+           → CLARIFY_RESOLVABLE blockers found:
+             * call clarifySession({context: <blocker description>})
+        
+        3. **Implementation Readiness**: Is there sufficient information to proceed?
+           → Information Missing (non-critical): call clarifySession({context: <gap description>})
+           → Information Sufficient: execute runSessionIteration({processes: ['codeImplementation']})
+
+        BLOCKER ANALYSIS EXAMPLES:
+        - onReview elements affecting core features → USER_DECISION_REQUIRED
+        - onReview elements for nice-to-have features → CLARIFY_RESOLVABLE (if time permits)
+        - Conflicting business requirements → USER_DECISION_REQUIRED
+        - Technical implementation approach choices → CLARIFY_RESOLVABLE
+        - Scope boundary changes → USER_DECISION_REQUIRED
+        - Performance vs. simplicity trade-offs → depends on business impact
+
+        Available processes for strategic selection:
+        {{AVAILABLE_PROCESSES}}
+
+        RESPONSE FORMAT:
+        If blockers detected, provide structured blocker analysis:
+        • **Critical Blockers Detected**: [blocker type - USER_DECISION_REQUIRED/CLARIFY_RESOLVABLE]
+        • **Blocker Details**: [specific description of what needs resolution]
+        • **Business Impact**: [why this blocks progress and business consequences]
+        • **Resolution Required**: [what user needs to decide or what needs clarification]
+        • **Recommended Action**: [specific next step - user consultation or clarifySession call]
+
+        If no blockers, follow normal decision tree and document reasoning.
+
+        Always base decisions on actual session content analysis, prioritizing blocker resolution over progress continuation.
 
     updateSession:
-      purpose: "Actualize session content by consolidating current progress, removing redundancy, and maintaining LAML-compliant structure"
+      purpose: "Actualize session content with automatic critical blocker detection and information prioritization"
       prompt: |
-        You are responsible for session content actualization and information consolidation.
+        You are responsible for intelligent session content actualization with automatic critical blocker detection and information prioritization.
         
-        Your tasks:
-        - Read current session file and analyze existing content structure
-        - Replace outdated information with current findings and decisions
-        - Consolidate redundant or repetitive information into concise summaries
-        - Remove logging-style entries and outdated progress notes
-        - Ensure LAML specification compliance in session structure
-        - Resolve contradictions and ensure content consistency
-        - Maintain compact format while preserving essential context
-        - SAVE the updated session file as the final step
+        INFORMATION CLASSIFICATION FRAMEWORK:
+        Apply this classification to every piece of information in the session:
         
-        MANDATORY ACTION: Use file reading and editing tools to actually update and SAVE the session file.
-        This is the primary objective - all analysis and consolidation serves the goal of saving actualized content.
-        Apply information actualization principle - replace outdated content, don't append.
-        Prioritize content density and relevance over comprehensive logging.
+        IMMUTABLE (never modify/remove existing, but can expand):
+        - Scope boundaries (inScope, outOfScope, onReview decisions) - can add new items, cannot change/remove existing
+        - User explicit decisions and preferences - can add new decisions, cannot change existing ones
+        - Agreed constraints and limitations - can add new constraints, cannot remove/change existing
+        - Success criteria and acceptance requirements - can add new criteria, cannot change/remove existing
+        - Established architectural decisions - can add new decisions, cannot change existing ones
+        
+        EVOLVING (replace outdated with current):
+        - Technical context discoveries
+        - Implementation approach details
+        - Current progress state
+        - Active requirements and specifications
+        - Working assumptions and hypotheses
+        
+        CONSOLIDATABLE (merge/compress semantically):
+        - Repetitive technical explanations
+        - Multiple attempts at same analysis
+        - Redundant scenario descriptions
+        - Overlapping technical discussions
+        - Similar user feedback themes
+        
+        EXPENDABLE (remove when no longer relevant):
+        - Superseded technical findings
+        - Abandoned implementation attempts
+        - Outdated progress notes
+        - Resolved temporary uncertainties
+        - Debug traces and investigation logs
+
+        CRITICAL BLOCKER MANAGEMENT:
+        When critical blockers are detected during updates:
+        1. **Document in onReview**: Move unresolved critical items to onReview section
+        2. **Add Blocker Metadata**: Include classification and urgency level
+        3. **Block Progress Indicators**: Mark implementation steps as blocked if dependent on unresolved items
+        4. **Preservation Rule**: Never remove or downgrade critical blockers without explicit resolution
+
+        SEMANTIC CONSOLIDATION PRINCIPLES:
+        1. Replace multiple statements about same topic with single authoritative statement
+        2. Merge related technical concepts into coherent technical context
+        3. Preserve decision rationale while removing repetitive justifications
+        4. Maintain information density through precise, meaningful language
+        5. Eliminate temporal artifacts (dates, versions) that don't affect current work
+        6. Resolve contradictions by establishing current authoritative state
+        7. Automatically elevate critical information to appropriate sections
+        
+        ACTUALIZATION ALGORITHM:
+        1. Read and analyze current session file structure
+        2. Manage critical blockers identified by planning process
+        3. Update onReview section with critical items requiring resolution
+        4. Classify every information block using the framework above
+        5. Identify contradictions and resolve them based on most recent authoritative information
+        6. Apply semantic consolidation to CONSOLIDATABLE information
+        7. Replace EVOLVING information with current state
+        8. Preserve existing IMMUTABLE information exactly as is, add new IMMUTABLE items when discovered
+        9. Remove EXPENDABLE information that no longer serves future work
+        10. Mark implementation steps as blocked if they depend on unresolved critical items
+        11. Ensure LAML compliance and structural integrity
+        12. SAVE the actualized session file
+        
+        CONTRADICTION RESOLUTION STRATEGY:
+        - User decisions override technical assumptions
+        - Explicit statements override implicit assumptions
+        - Recent authoritative information overrides older speculation
+        - Scope boundaries override feature suggestions
+        - Tested facts override theoretical possibilities
+        - Critical blockers override progress assumptions
+        
+        CONTEXT PRESERVATION RULES:
+        - Maintain sufficient context for work continuation
+        - Preserve relationships between decisions and their rationale
+        - Keep technical context necessary for implementation
+        - Maintain user scenario integrity
+        - Preserve progress tracking accuracy
+        - IMMUTABLE expansion: Add new discoveries to IMMUTABLE categories without modifying existing content
+        - Preserve critical blocker context and resolution requirements
+        
+        MANDATORY ACTION: Use file reading and editing tools to update and SAVE the session file.
         
         Key deliverables:
-        - Actualized session file saved to disk with consolidated information
-        - LAML-compliant structure with resolved contradictions
-        - Compact content maintaining essential context for continuation
+        - Semantically actualized session file with preserved critical context
+        - Managed critical blockers from planning process
+        - Updated onReview section with critical items requiring resolution
+        - Resolved contradictions and information conflicts
+        - Consolidated redundant information without losing essential meaning
+        - LAML-compliant structure with improved clarity and density
         
-        RESPONSE FORMAT: Provide a brief consolidation summary containing:
-        • **Content Consolidated**: Main sections updated and redundancy removed
-        • **Structure Changes**: LAML compliance improvements made
-        • **Information Actualized**: Outdated content replaced with current findings
-        • **Contradictions Resolved**: Key conflicts addressed in session
-        • **File Status**: Confirmation that updated session file was saved
+        RESPONSE FORMAT: Brief changelog-style summary with one line per item:
+        • **IMMUTABLE**: [specific preserved item]
+        • **IMMUTABLE**: [another preserved item]
+        • **EVOLVING**: [specific updated item]
+        • **EVOLVING**: [another updated item]
+        • **CONSOLIDATED**: [specific merged item]
+        • **REMOVED**: [specific deleted item]
+        • **CONFLICTS**: [specific resolved contradiction]
+        • **CONFLICTS**: [another specific resolved contradiction]
+        • **BLOCKERS MANAGED**: [USER_DECISION_REQUIRED items preserved]
+        • **BLOCKERS MANAGED**: [CLARIFY_RESOLVABLE items preserved]
+        • **ONREVIEW UPDATED**: [items moved to onReview section]
+        • **PROGRESS BLOCKED**: [implementation steps marked as blocked]
+        • **STATUS**: File saved
         
-        Always complete the process by saving the updated session file to ensure progress preservation. 
+        Always prioritize critical blocker management and proper preservation over mechanical size reduction.
+
+  templates:
+    runSessionIteration:
+      purpose: "Template for unified execution prompt generation"
+      unifiedPromptHeader: "Execute the following processes in sequence:\n\n"
+      processTemplate: |
+        === PROCESS: {{PROCESS_NAME}} ===
+        Purpose: {{PROCESS_PURPOSE}}
+
+        {{PROCESS_PROMPT}}
+
+        === END PROCESS: {{PROCESS_NAME}} ===
+
+      contextGuidance: |
+        CONTEXT GUIDANCE:
+        {{CONTEXT}}
+
+        Apply this context to refine your process execution for more precise results.
+
+      mandatoryCompletion: |
+        MANDATORY COMPLETION SEQUENCE:
+        After completing all processes above:
+        1. Call updateSession() to save your progress and findings
+        2. After updateSession completion, call planSessionIteration() to determine next steps
+        3. Follow the instructions returned by planSessionIteration
+
+        This sequence ensures proper workflow continuation and context preservation.
+
+    clarifySessionExtensions:
+      purpose: "Template extensions for clarifySession prompt"
+      contextSection: |
+        PROBLEM CONTEXT PROVIDED: {{CONTEXT}}
+
+        AVAILABLE PROCESSES FOR SELECTION:
+        {{AVAILABLE_PROCESSES}}
+
+        RESOLUTION ALGORITHM:
+        1. Analyze the provided problem context to identify specific information gaps
+        2. Select appropriate processes from the available list that can help resolve the uncertainty
+        3. Validate that selected processes make logical sense for the problem context
+        4. Call runSessionIteration with selected processes and transformed context
+        5. If after iteration completion the problem is not resolved, explicitly request user help
+
+        Remember: Transform the problem context into actionable iteration context that guides resolution. 

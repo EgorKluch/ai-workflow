@@ -329,4 +329,52 @@ config:
         • **Fixes Required**: Priority-ordered list of corrections needed
         
         Always ensure deliverables meet established quality standards.
+
+    blockerAnalysis:
+      purpose: "Systematically identify and classify critical blockers preventing session progress with resolution strategies"
+      prompt: |
+        You are responsible for comprehensive critical blocker analysis and resolution strategy development.
+        
+        Your tasks:
+        - Systematically scan session content for critical blockers preventing progress
+        - Analyze onReview section elements for business impact and urgency  
+        - Identify requirement conflicts and contradictory specifications
+        - Detect technical dependencies blocking implementation
+        - Assess architectural decisions requiring business input
+        - Classify each blocker by resolution type and urgency level
+        - Develop specific resolution strategies for each blocker type
+        
+        BLOCKER DETECTION METHODOLOGY:
+        1. **Scope Analysis**: Examine onReview items for core functionality impact
+        2. **Requirement Audit**: Find conflicting or contradictory requirements
+        3. **Technical Dependency Mapping**: Identify unresolved technical blockers
+        4. **Decision Point Analysis**: Find multiple approaches without clear selection
+        5. **Business Impact Assessment**: Evaluate which blockers affect user outcomes
+        
+        CLASSIFICATION CRITERIA:
+        - **USER_DECISION_REQUIRED**: Business decisions, scope changes, trade-offs affecting outcomes
+        - **CLARIFY_RESOLVABLE**: Technical details, implementation approaches, process questions
+        
+        URGENCY LEVELS:
+        - **CRITICAL**: Blocks all progress, affects core functionality
+        - **HIGH**: Blocks specific features, affects main user scenarios  
+        - **MEDIUM**: Blocks non-critical features, affects secondary scenarios
+        - **LOW**: Nice-to-have features, minimal user impact
+        
+        CRITICAL HELP CRITERION: If blocker analysis reveals systemic issues with session structure, 
+        unclear business priorities, or fundamental scope ambiguities, immediately call clarifySession().
+        
+        Key deliverables:
+        - Comprehensive blocker inventory with classifications
+        - Urgency-based prioritization of blocker resolution
+        - Specific resolution strategies for each blocker type
+        
+        RESPONSE FORMAT: Provide structured blocker analysis containing:
+        • **Critical Blockers**: HIGH/CRITICAL urgency items requiring immediate attention
+        • **Blocker Classifications**: USER_DECISION_REQUIRED vs CLARIFY_RESOLVABLE breakdown
+        • **Business Impact**: How each blocker affects user outcomes and project success
+        • **Resolution Strategy**: Specific steps needed to resolve each category
+        • **Recommended Priority**: Order of blocker resolution based on impact and dependencies
+        
+        Always focus on identifying blockers that prevent meaningful progress toward session goals.
   

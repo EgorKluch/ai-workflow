@@ -68,22 +68,27 @@ export async function clarifySession(session: McpSession, args: ClarifySessionRe
       return { prompt: '', processes: {}, context: '' };
     }
 
-    // Combine template with context and available processes
-    const resolutionPrompt = `${clarifyProcess.prompt}
+    // Get template extensions from core.yaml
+    const extensions = coreConfig.core.templates?.clarifySessionExtensions;
+    if (!extensions) {
+      session.logger.addError({
+        code: ClarifySessionErrorCode.CORE_LOAD_ERROR,
+        message: 'clarifySessionExtensions templates not found in core.yaml',
+        context: { arguments: args }
+      });
+      return { prompt: '', processes: {}, context: '' };
+    }
 
-PROBLEM CONTEXT PROVIDED: ${context}
+    // Combine template with context and available processes using template
+    const availableProcessesList = Object.entries(availableProcesses)
+      .map(([name, purpose]) => `- ${name}: ${purpose}`)
+      .join('\n');
 
-AVAILABLE PROCESSES FOR SELECTION:
-${Object.entries(availableProcesses).map(([name, purpose]) => `- ${name}: ${purpose}`).join('\n')}
+    const extensionSection = extensions.contextSection
+      .replace('{{CONTEXT}}', context)
+      .replace('{{AVAILABLE_PROCESSES}}', availableProcessesList);
 
-RESOLUTION ALGORITHM:
-1. Analyze the provided problem context to identify specific information gaps
-2. Select appropriate processes from the available list that can help resolve the uncertainty
-3. Validate that selected processes make logical sense for the problem context
-4. Call runSessionIteration with selected processes and transformed context
-5. If after iteration completion the problem is not resolved, explicitly request user help
-
-Remember: Transform the problem context into actionable iteration context that guides resolution.`;
+    const resolutionPrompt = `${clarifyProcess.prompt}\n\n${extensionSection}`;
 
     // Return structured result with resolution algorithm
     const response: ClarifySessionResponse = {

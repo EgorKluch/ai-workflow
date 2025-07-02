@@ -1,7 +1,8 @@
 import { McpSession } from 'flowmcp';
 import { RunSessionIterationRequest, RunSessionIterationResponse, RunSessionIterationErrorCode } from './runSessionIteration.types.js';
-import { getConfig } from '../../utils/getConfig/index.js';
+import { getConfig, getCoreConfig } from '../../utils/getConfig/index.js';
 import { Config } from '../../types/config.types.js';
+import { CoreConfig } from '../../types/core.types.js';
 
 export async function runSessionIteration(session: McpSession, args: RunSessionIterationRequest): Promise<RunSessionIterationResponse> {
   
@@ -70,31 +71,51 @@ export async function runSessionIteration(session: McpSession, args: RunSessionI
       return { prompt: '', processes: {} };
     }
 
-    // Prepare unified execution prompt with process instructions
-    let unifiedPrompt = `Execute the following processes in sequence:\n\n`;
+    // Load templates from core.yaml
+    let coreConfig: CoreConfig;
+    try {
+      coreConfig = getCoreConfig<CoreConfig>();
+    } catch (coreError) {
+      session.logger.addError({
+        code: RunSessionIterationErrorCode.CONFIG_LOAD_ERROR,
+        message: `Failed to load core.yaml: ${coreError instanceof Error ? coreError.message : String(coreError)}`,
+        context: { arguments: args, coreError }
+      });
+      return { prompt: '', processes: {} };
+    }
 
-    // Add each process prompt
+    const templates = coreConfig.core.templates?.runSessionIteration;
+    if (!templates) {
+      session.logger.addError({
+        code: RunSessionIterationErrorCode.CONFIG_LOAD_ERROR,
+        message: 'runSessionIteration templates not found in core.yaml',
+        context: { arguments: args }
+      });
+      return { prompt: '', processes: {} };
+    }
+
+    // Prepare unified execution prompt with process instructions
+    let unifiedPrompt = templates.unifiedPromptHeader;
+
+    // Add each process prompt using template
     for (const processName of processes) {
       const process = processDefinitions[processName];
-      unifiedPrompt += `=== PROCESS: ${processName} ===\n`;
-      unifiedPrompt += `Purpose: ${process.purpose}\n\n`;
-      unifiedPrompt += `${process.prompt}\n\n`;
-      unifiedPrompt += `=== END PROCESS: ${processName} ===\n\n`;
+      let processSection = templates.processTemplate
+        .replace(/{{PROCESS_NAME}}/g, processName)
+        .replace('{{PROCESS_PURPOSE}}', process.purpose)
+        .replace('{{PROCESS_PROMPT}}', process.prompt);
+      unifiedPrompt += processSection + '\n';
     }
 
     // Include context guidance if context parameter provided
     if (context) {
-      unifiedPrompt += `CONTEXT GUIDANCE:\n${context}\n\n`;
-      unifiedPrompt += `Apply this context to refine your process execution for more precise results.\n\n`;
+      const contextSection = templates.contextGuidance
+        .replace('{{CONTEXT}}', context);
+      unifiedPrompt += contextSection + '\n\n';
     }
 
-    // Add mandatory updateSession + planSessionIteration sequence to prompt
-    unifiedPrompt += `MANDATORY COMPLETION SEQUENCE:\n`;
-    unifiedPrompt += `After completing all processes above:\n`;
-    unifiedPrompt += `1. Call updateSession() to save your progress and findings\n`;
-    unifiedPrompt += `2. After updateSession completion, call planSessionIteration() to determine next steps\n`;
-    unifiedPrompt += `3. Follow the instructions returned by planSessionIteration\n\n`;
-    unifiedPrompt += `This sequence ensures proper workflow continuation and context preservation.`;
+    // Add mandatory completion sequence
+    unifiedPrompt += templates.mandatoryCompletion;
 
     const response: RunSessionIterationResponse = {
       prompt: unifiedPrompt,

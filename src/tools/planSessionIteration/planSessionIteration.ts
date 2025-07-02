@@ -1,6 +1,7 @@
 import { McpSession } from 'flowmcp';
-import { getConfig } from '../../utils/getConfig/index.js';
+import { getConfig, getCoreConfig } from '../../utils/getConfig/index.js';
 import { Config } from '../../types/config.types.js';
+import { CoreConfig } from '../../types/core.types.js';
 import { PlanSessionIterationRequest, PlanSessionIterationResponse } from './planSessionIteration.types.js';
 
 export async function planSessionIteration(
@@ -18,34 +19,28 @@ export async function planSessionIteration(
       };
     }, {} as Record<string, string>);
 
-    // Prepare strategic planning prompt with decision logic
-    const prompt = `You are responsible for strategic planning that determines next workflow steps based on session progress.
+    // Load planning prompt from core.yaml
+    const coreConfig = getCoreConfig<CoreConfig>();
+    const planProcess = coreConfig.core.processes.planSessionIteration;
+    
+    if (!planProcess) {
+      session.logger.addError({
+        code: 'PLAN_SESSION_ERROR',
+        message: 'planSessionIteration process not found in core.yaml',
+        context: { args }
+      });
+      return {
+        prompt: '',
+        processes: {}
+      };
+    }
 
-Your tasks:
-- Read session file and parse session goal to determine success criteria
-- Evaluate current progress against goal requirements by analyzing session content
-- If session goal is fully achieved: execute runSessionIteration({processes: ['qualityAssurance']})
-- If goal not achieved, determine if implementation can begin or if information is missing
-- If information missing: formulate description of missing information and call clarifySession({context: <description>})
-- If information sufficient: execute runSessionIteration({processes: ['codeImplementation']})
-
-CRITICAL: This is a decision-making process that analyzes session state and determines next steps.
-The algorithm includes branching logic for different session states.
-
-Available processes for strategic selection:
-${Object.entries(processes).map(([name, purpose]) => `- ${name}: ${purpose}`).join('\n')}
-
-Key decision points:
-1. Goal Achievement Check: Is the session goal fully completed?
-2. Implementation Readiness: Is there sufficient information to proceed with implementation?
-3. Information Gaps: What specific information is missing that prevents progress?
-
-Follow this decision tree:
-- Goal Complete → runSessionIteration({processes: ['qualityAssurance']})
-- Goal Incomplete + Information Missing → clarifySession({context: <gap description>})
-- Goal Incomplete + Information Sufficient → runSessionIteration({processes: ['codeImplementation']})
-
-Always base decisions on actual session content analysis, not assumptions.`;
+    // Replace template variables in the prompt
+    const availableProcessesList = Object.entries(processes)
+      .map(([name, purpose]) => `- ${name}: ${purpose}`)
+      .join('\n');
+    
+    const prompt = planProcess.prompt.replace('{{AVAILABLE_PROCESSES}}', availableProcessesList);
 
     return {
       prompt,

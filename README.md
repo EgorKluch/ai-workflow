@@ -5,9 +5,11 @@ Advanced MCP (Model Context Protocol) server implementing fully automated develo
 ## Features
 
 - **Full Automation**: Complete automation from user request to implementation
-- **Systematic Progression**: Each process analyzes session state to determine next steps
+- **Systematic Progression**: Each process analyzes session state, detects critical blockers, and determines next steps
+- **Critical Blocker Detection**: Automatically identifies and classifies blockers preventing session progress
 - **Context Preservation**: Every process completion updates session state for intelligent analysis
-- **Cyclical Execution**: Continuous workflow cycles until goal achievement
+- **Cyclical Execution**: Continuous workflow cycles until goal achievement with blocker resolution
+- **User Consultation**: Intelligent user engagement for critical decisions and ambiguity resolution
 - **FlowMCP Integration**: Built with FlowMCP toolkit for automatic validation and error handling
 - **Project Parameter**: Automatic project path injection for all tools
 - **TypeScript**: Full TypeScript support with proper ES module configuration
@@ -89,37 +91,56 @@ Return available processes from config.yaml.
 
 ### updateSession (promptReturningTool)
 
-Return prompt for session state update procedure.
+Intelligent session content actualization with critical blocker management and information prioritization.
+
+**Features:**
+- **Information Classification**: Categorizes content as IMMUTABLE, EVOLVING, CONSOLIDATABLE, or EXPENDABLE
+- **Critical Blocker Management**: Manages and preserves blockers identified by planning process
+- **Semantic Consolidation**: Merges repetitive content while preserving meaning
+- **Critical Context Preservation**: Protects scope boundaries, user decisions, and agreed constraints
+- **Contradiction Resolution**: Resolves conflicts based on user decisions and authoritative information
+- **Progress Tracking**: Marks implementation steps as blocked if dependent on unresolved critical items
 
 **Parameters:**
 - `project` (automatic, string): Absolute path to the project directory (automatically injected by FlowMCP)
-- `updates` (required, object): Session update data structure (flexible schema)
 
 **Returns:**
-- `prompt` (string): Algorithm prompt for session update procedure
+- `prompt` (string): Advanced session actualization algorithm with blocker management and classification framework
 
 ### clarifySession (promptReturningTool)
 
-Handle uncertainty by selecting appropriate processes for resolution.
+Resolve information gaps by first consulting user with clear questions, then executing targeted process iterations, and escalating only if automated resolution fails.
+
+**Features:**
+- **User Consultation**: Formulates clear, specific questions for user consultation with context
+- **Strategic Process Execution**: Selects appropriate processes based on user guidance
+- **Targeted Resolution**: Transforms user responses into actionable iteration context
+- **Automated Escalation**: Escalates to user only if automated approaches fail after consultation
 
 **Parameters:**
 - `project` (automatic, string): Absolute path to the project directory (automatically injected by FlowMCP)
 - `context` (required, string): Description of uncertain situation, ambiguity, conflict that needs clarification
 
 **Returns:**
-- `prompt` (string): Resolution strategy algorithm for LLM
+- `prompt` (string): Resolution strategy algorithm with user consultation for LLM
 - `processes` (object): Available processes for selection
 - `context` (string): Echo of input context parameter
 
 ### planSessionIteration (promptReturningTool)
 
-Analyze session state and determine next iteration approach.
+Analyze session state, detect critical blockers, and determine next workflow steps with comprehensive blocker resolution.
+
+**Features:**
+- **Critical Blocker Detection**: Systematically detects blockers preventing progress continuation
+- **Blocker Classification**: Classifies blockers as USER_DECISION_REQUIRED or CLARIFY_RESOLVABLE
+- **Strategic Decision Making**: Determines workflow steps based on goal achievement and blocker analysis
+- **Progress Control**: Blocks further progress until critical issues are resolved
 
 **Parameters:**
 - `project` (automatic, string): Absolute path to the project directory (automatically injected by FlowMCP)
 
 **Returns:**
-- `prompt` (string): Strategic planning algorithm for LLM
+- `prompt` (string): Strategic planning algorithm with critical blocker detection for LLM
 - `processes` (object): Available processes for strategic selection
 
 ## Cursor Integration
@@ -151,8 +172,8 @@ npm run build
 
 The server uses YAML configuration files:
 
-- **`src/config.yaml`**: Process definitions with purposes and prompts
-- **`src/core.yaml`**: Core process templates for updateSession and clarifySession
+- **`config/config.yaml`**: Process definitions with purposes and prompts
+- **`config/core.yaml`**: Core process templates for updateSession, clarifySession, and planSessionIteration
 
 No additional configuration is required - the server works with the provided configuration files.
 
@@ -162,6 +183,9 @@ No additional configuration is required - the server works with the provided con
 
 ```
 session-manager/
+├── config/
+│   ├── config.yaml       # Process definitions
+│   └── core.yaml         # Core process prompts
 ├── src/
 │   ├── index.ts          # Main server implementation
 │   ├── tools/            # MCP tool implementations
@@ -173,15 +197,17 @@ session-manager/
 │   │   └── planSessionIteration/
 │   ├── types/            # TypeScript type definitions
 │   ├── utils/            # Utility functions
-│   ├── config.yaml       # Process definitions
-│   ├── core.yaml         # Core process prompts
-│   └── __tests__/
-│       └── index.test.ts # Test suite
+│   └── __tests__/        # Test suite
+│       ├── tools/        # Tool-specific tests
+│       ├── integration/  # Integration tests
+│       └── utils/        # Utility tests
 ├── dist/                 # Compiled output (generated)
 ├── sessions/             # Session files directory
+├── tmp/                  # Temporary files
 ├── package.json
 ├── tsconfig.json
 ├── jest.config.js
+├── process.yaml          # Workflow documentation
 └── README.md
 ```
 
@@ -190,9 +216,11 @@ session-manager/
 - **FlowMCP Toolkit**: Built with FlowMCP for enhanced MCP tool development  
 - **Automatic Project Injection**: All tools automatically receive project parameter
 - **Session-based Error Handling**: Uses McpSession for error collection and response generation
+- **Critical Blocker System**: Integrated blocker detection, classification, and resolution workflow
 - **Tool Type Classification**: promptReturningTools vs dataReturningTools architecture
-- **Cyclical Workflow**: Continuous execution cycles until goal achievement
-- **Process Configuration**: Flexible process definitions via config.yaml and core.yaml
+- **Cyclical Workflow**: Continuous execution cycles with blocker resolution until goal achievement
+- **User Consultation Framework**: Intelligent user engagement for critical decisions and ambiguity resolution
+- **Process Configuration**: Flexible process definitions via config/config.yaml and config/core.yaml
 - **ES Modules**: Full ES module support with NodeNext module resolution
 - **TypeScript**: Strict TypeScript configuration with isolated modules
 - **Testing**: Jest with ES module support and comprehensive test coverage
@@ -218,25 +246,29 @@ session-manager/
 
 ### Workflow Execution Pattern
 
-The server implements a cyclical workflow execution pattern:
+The server implements a cyclical workflow execution pattern with critical blocker detection:
 
 1. **createSession**: Initialize session and trigger planning
-2. **planSessionIteration**: Analyze session state and determine next steps
-3. **runSessionIteration**: Execute selected processes
-4. **updateSession**: Save progress and update context
-5. **planSessionIteration**: Determine next cycle
-6. Repeat until goal achievement (qualityAssurance process confirms completion)
+2. **planSessionIteration**: Analyze session state, detect critical blockers, and determine next steps
+3. **Blocker Resolution**: Handle USER_DECISION_REQUIRED (user consultation) or CLARIFY_RESOLVABLE (clarifySession)
+4. **runSessionIteration**: Execute selected processes (only if no critical blockers)
+5. **updateSession**: Save progress, manage blockers, and update context
+6. **planSessionIteration**: Determine next cycle with re-evaluation of blockers
+7. Repeat until goal achievement (qualityAssurance process confirms completion)
+
+**Blocker Integration**: Progress is blocked until critical issues are resolved, preventing wasted implementation effort.
 
 ### Key Processes
 
-The system requires these processes in `config.yaml`:
+The system requires these processes in `config/config.yaml`:
+- **blockerAnalysis**: Specialized blocker detection and classification process
 - **qualityAssurance**: Final validation process that can terminate workflow
 - **codeImplementation**: Main development implementation process
 - Additional domain-specific processes as needed
 
 ### Adding New Processes
 
-1. Add process definition to `src/config.yaml`:
+1. Add process definition to `config/config.yaml`:
 ```yaml
 newProcess:
   purpose: "Single sentence describing process goal"
@@ -284,3 +316,48 @@ MIT
 4. Add tests for new functionality
 5. Ensure all tests pass
 6. Submit a pull request 
+
+## Critical Blocker Management System
+
+The system includes automatic detection and classification of critical blockers that prevent session progress, ensuring robust workflow management where critical decisions are never skipped.
+
+### Blocker Types
+
+**USER_DECISION_REQUIRED**:
+- Elements in `onReview` section affecting core functionality
+- Conflicting business requirements 
+- Scope boundary changes requiring approval
+- Architecture decisions with business impact
+
+**CLARIFY_RESOLVABLE**:
+- Technical implementation details needing clarification
+- Non-critical requirement ambiguities  
+- Process or workflow questions
+- Technical option selections with clear trade-offs
+
+### Workflow Integration
+
+1. **Planning Phase**: `planSessionIteration` detects critical blockers before determining next steps
+2. **Update Phase**: `updateSession` manages and preserves blocker context
+3. **Progress Control**: Implementation is blocked until critical issues are resolved
+4. **User Consultation**: Critical blockers trigger user decision requests via `clarifySession`
+
+### Example Scenario
+
+```yaml
+# Session file with critical blocker
+scopeBoundaries:
+  inScope:
+    - User authentication system
+    - Basic user profile management
+  outOfScope:  
+    - Advanced user analytics
+    - Third-party integrations
+  onReview:
+    - Password reset functionality  # BLOCKS core auth system
+    - Profile picture upload      # Non-critical, can proceed without
+```
+
+**System Response**:
+- **BLOCKED**: Password reset functionality affects core authentication - USER_DECISION_REQUIRED
+- **PROCEED**: Profile picture upload is non-critical - can be resolved later 

@@ -8,14 +8,19 @@ principles:
     practicalBenefit: "Developer provides high-level goal, system executes everything automatically with minimal intervention"
 
   systematicProgression:
-    belief: "Each process analyzes session state to determine if goal is achieved and what steps are needed"
-    demonstration: "planSessionIteration tool analyzes session file and provides instruction for next steps"
-    practicalBenefit: "Intelligent workflow execution based on actual session progress and goal achievement"
+    belief: "Each process analyzes session state to determine if goal is achieved, detect critical blockers, and decide what steps are needed"
+    demonstration: "planSessionIteration tool analyzes session file, detects blockers, and provides instruction for next steps or blocker resolution"
+    practicalBenefit: "Intelligent workflow execution based on actual session progress, goal achievement, and critical blocker resolution"
 
   contextPreservation:
     belief: "Every process completion updates session state for intelligent next step analysis"
     demonstration: "updateSession + planSessionIteration called after every process to analyze progress"
     practicalBenefit: "Preserved context, intelligent progress analysis, goal-oriented execution"
+
+  blockerPrevention:
+    belief: "Critical blockers must be detected and resolved before implementation to prevent wasted effort and ensure successful completion"
+    demonstration: "planSessionIteration detects blockers, classifies resolution type, and blocks progress until resolution"
+    practicalBenefit: "Prevents implementation of features with unresolved dependencies, scope conflicts, or missing business decisions"
 
   cyclicalExecution:
     belief: "Workflow is designed to run in continuous cycles until goal is achieved"
@@ -116,10 +121,10 @@ tools:
        - "MCP: Return structured result with prompt, context, and process definitions"
 
   updateSession:
-    purpose: "Return prompt for session state update procedure"
+    purpose: "Return prompt for session state update procedure with critical blocker management"
     signature: "updateSession()"
     toolType: "promptReturningTools"
-    description: "Provides algorithmic prompt for LLM to analyze session and update its state"
+    description: "Provides algorithmic prompt for intelligent session content actualization with automatic critical blocker management and information prioritization"
     
     inputData:
       none: "No input parameters required - LLM determines what to update based on session analysis"
@@ -128,15 +133,22 @@ tools:
       success:
         prompt:
           type: "string"
-          description: "Algorithm prompt for session update procedure"
+          description: "Algorithm prompt for session update procedure with blocker management"
           source: "core.yaml configuration file"
-          algorithmContent: "LLM: Instructions on how to read session file, analyze current state, determine necessary updates, and save back"
+          algorithmContent: 
+            - "LLM: Apply INFORMATION CLASSIFICATION FRAMEWORK (IMMUTABLE, EVOLVING, CONSOLIDATABLE, EXPENDABLE)"
+            - "LLM: Manage critical blockers identified by planning process"
+            - "LLM: Update onReview section with critical items requiring resolution"
+            - "LLM: Apply semantic consolidation to reduce redundancy while preserving critical context"
+            - "LLM: Resolve contradictions using established resolution strategy"
+            - "LLM: Mark implementation steps as blocked if dependent on unresolved critical items"
+            - "LLM: Save actualized session file with improved clarity and density"
     
       algorithm:
        - "MCP: Read session update prompt from core.yaml"
-       - "MCP: Return prompt as string for LLM execution"
-       - "MCP: LLM will analyze session content and determine updates autonomously"
-      
+       - "MCP: Return comprehensive prompt including blocker management and information prioritization"
+       - "MCP: LLM will analyze session content and manage blockers autonomously"
+
   getSessionProcesses:
     purpose: "Return available processes from config.yaml"
     signature: "getSessionProcesses()"
@@ -160,10 +172,10 @@ tools:
        - "MCP: Implementation: reduce(processes, (result, {purpose}, name) => ({...result, [name]: purpose}), {})"
          
   clarifySession:
-    purpose: "Handle uncertainty by selecting appropriate processes for resolution"
+    purpose: "Resolve information gaps by first consulting user with clear questions, then executing targeted process iterations, and escalating only if automated resolution fails"
     signature: "clarifySession(context: string)"
     toolType: "promptReturningTools"
-    description: "Analyzes uncertain situation and provides resolution strategy prompt"
+    description: "Analyzes uncertain situation and provides resolution strategy through user consultation and strategic process execution"
     
     inputData:
       context:
@@ -175,12 +187,15 @@ tools:
       success:
         prompt:
           type: "string"
-          description: "Resolution strategy algorithm for LLM"
+          description: "Resolution strategy algorithm with user consultation for LLM"
           algorithmContent:
-            - "LLM: Analyze provided context to identify information gaps"
-            - "LLM: Select appropriate processes from available list that can help resolve uncertainty"
-            - "LLM: Call runSessionIteration with selected processes and provided context"
-            - "LLM: If after iteration completion the problem is not resolved, explicitly request user help"
+            - "LLM: Analyze provided problem context to identify specific information gaps and uncertainty types"
+            - "LLM: Formulate clear, specific questions for user consultation with context about why information is needed"
+            - "LLM: Present user questions in structured format explaining what decision or action depends on their answer"
+            - "LLM: Process user responses and transform them into actionable iteration context"
+            - "LLM: Execute runSessionIteration with appropriate processes based on user guidance and problem context"
+            - "LLM: Evaluate iteration results and determine if uncertainties are resolved"
+            - "LLM: If automated resolution fails after user consultation, escalate with explanation of attempted approaches"
         processes:
           type: "object"
           description: "Available processes for selection (from getSessionProcesses)"
@@ -190,15 +205,15 @@ tools:
     
       algorithm:
         - "MCP: Get available processes via getSessionProcesses()"
-        - "MCP: Read clarification prompt template from core.yaml"
+        - "MCP: Read clarification prompt template from core.yaml with user consultation guidelines"
         - "MCP: Combine template with context and available processes"
-        - "MCP: Return structured result with resolution algorithm"
+        - "MCP: Return structured result with user consultation and resolution algorithm"
             
   planSessionIteration:
-    purpose: "Analyze session state and determine next iteration approach"
+    purpose: "Analyze session state, detect critical blockers, and determine next workflow steps with comprehensive blocker resolution"
     signature: "planSessionIteration()"
     toolType: "promptReturningTools"
-    description: "Strategic planning tool that determines next workflow steps based on session progress"
+    description: "Strategic planning tool that determines next workflow steps based on session progress and critical blocker analysis"
     
     inputData:
       none: "No input parameters - LLM uses session path from context"
@@ -207,22 +222,25 @@ tools:
       success:
         prompt:
           type: "string"
-          description: "Strategic planning algorithm for LLM"
+          description: "Strategic planning algorithm with critical blocker detection for LLM"
           algorithmContent:
             - "LLM: Read session file and parse session goal to determine success criteria"
-            - "LLM: Evaluate current progress against goal requirements by analyzing session content"
-            - "LLM: If session goal is fully achieved: execute runSessionIteration({processes: ['qualityAssurance']})"
-            - "LLM: If goal not achieved, determine if implementation can begin or if information is missing"
-            - "LLM: If information missing: formulate description of missing information and call clarifySession({context: <description>})"
-            - "LLM: If information sufficient: execute runSessionIteration({processes: ['codeImplementation']})"
+            - "LLM: Evaluate current progress against goal requirements by analyzing session content" 
+            - "LLM: CRITICAL: Detect and analyze critical blockers using established detection algorithm"
+            - "LLM: Classify blockers as USER_DECISION_REQUIRED or CLARIFY_RESOLVABLE"
+            - "LLM: If session goal fully achieved: execute runSessionIteration({processes: ['qualityAssurance']})"
+            - "LLM: If USER_DECISION_REQUIRED blockers found: stop progress, request user decisions"
+            - "LLM: If CLARIFY_RESOLVABLE blockers found: call clarifySession({context: blocker description})"
+            - "LLM: If no blockers and information sufficient: execute runSessionIteration({processes: ['codeImplementation']})"
+            - "LLM: If information missing: call clarifySession({context: gap description})"
         processes:
           type: "object"
           description: "Available processes for strategic selection (from getSessionProcesses)"
     
       algorithm:
        - "MCP: Get available processes via getSessionProcesses()"
-       - "MCP: Prepare strategic planning prompt with decision logic"
-       - "MCP: Include branching logic for different session states"
+       - "MCP: Prepare strategic planning prompt with critical blocker detection logic"
+       - "MCP: Include decision tree with blocker classification and resolution paths"
        - "MCP: Return structured result with planning algorithm and process options"
 
 # === WORKFLOW EXECUTION PATTERN ===
@@ -243,10 +261,18 @@ workflowPattern:
     
     flowControl:
       normal: "runSessionIteration → updateSession → planSessionIteration → runSessionIteration"
+      withBlockers: "planSessionIteration (detects blockers) → handles USER_DECISION_REQUIRED (user consultation) or CLARIFY_RESOLVABLE (clarifySession)"
+      blockerResolution: "clarifySession → runSessionIteration → updateSession → planSessionIteration → (re-evaluate blockers)"
       uncertainty: "planSessionIteration → clarifySession → runSessionIteration → updateSession → planSessionIteration"
       completion: "planSessionIteration → runSessionIteration({processes: ['qualityAssurance']}) → [potential termination]"
   
   keyProcesses:
+    blockerAnalysis:
+      role: "Specialized blocker detection and classification process"
+      location: "Must be defined in config.yaml"
+      trigger: "When systematic blocker analysis is needed beyond planSessionIteration detection"
+      purpose: "Systematically identify and classify critical blockers preventing session progress with resolution strategies"
+      
     qualityAssurance:
       role: "Final validation process that can terminate workflow"
       location: "Must be defined in config.yaml"
@@ -257,12 +283,57 @@ workflowPattern:
       location: "Must be defined in config.yaml"
       trigger: "When planSessionIteration determines sufficient information available"
 
+# === BLOCKER SYSTEM ===
+blockerSystem:
+  purpose: "Critical blocker detection, classification, and resolution system integrated into workflow"
+  
+  blockerTypes:
+    description: "Classification system for critical blockers that prevent session progress"
+    categories:
+      USER_DECISION_REQUIRED:
+        description: "Blockers requiring business decisions from user"
+        examples:
+          - "Elements in onReview section affecting core functionality"
+          - "Conflicting requirements needing business decision"
+          - "Scope boundary changes requiring approval"
+          - "Architecture decisions with business impact"
+        resolution: "User consultation and explicit decision"
+        
+      CLARIFY_RESOLVABLE:
+        description: "Blockers that can be resolved through analysis or clarification"
+        examples:
+          - "Technical implementation details needing clarification"
+          - "Non-critical requirement ambiguities"
+          - "Process or workflow questions"
+          - "Technical option selections with clear trade-offs"
+        resolution: "Automated analysis via clarifySession process"
+  
+  detectionAlgorithm:
+    responsibility: "planSessionIteration process performs critical blocker detection"
+    methodology:
+      1: "Scope Analysis - Check unresolved elements in onReview section"
+      2: "Requirement Conflicts - Identify contradictory or ambiguous requirements"
+      3: "Technical Dependencies - Find critical technical decisions without resolution"
+      4: "Implementation Blockers - Identify architectural or dependency issues"
+    
+  managementWorkflow:
+    detection: "planSessionIteration identifies and classifies blockers"
+    preservation: "updateSession manages and preserves blocker context"
+    resolution: "clarifySession handles CLARIFY_RESOLVABLE blockers via user consultation"
+    escalation: "USER_DECISION_REQUIRED blockers stop progress until user provides decisions"
+    
+  workflowIntegration:
+    principle: "Blockers override progress assumptions and force resolution before continuation"
+    priority: "Blocker resolution takes precedence over feature implementation"
+    safety: "No implementation proceeds while critical blockers remain unresolved"
+
 # === INTEGRATION REQUIREMENTS ===
 integration:
   purpose: "Requirements for system components integration"
   
   configYaml:
     requiredProcesses:
+      - "blockerAnalysis: Specialized blocker detection and classification process"
       - "qualityAssurance: Final validation and potential workflow termination"
       - "codeImplementation: Main development implementation process"
       - "Additional processes as needed for specific workflow domains"
@@ -274,8 +345,9 @@ integration:
   
   coreYaml:
     requiredPrompts:
-      - "updateSession: Algorithm for session state updating"
-      - "clarifySession: Template for uncertainty resolution"
+      - "updateSession: Algorithm for session state updating with critical blocker management and information prioritization"
+      - "clarifySession: Template for uncertainty resolution through user consultation and strategic process execution"
+      - "planSessionIteration: Strategic planning with critical blocker detection and workflow decision logic"
     
     promptStructure:
       format: "Multi-line algorithmic instructions"
