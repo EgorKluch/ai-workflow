@@ -2,11 +2,15 @@ import { McpSession } from 'flowmcp';
 import { GetSessionProcessesRequest, GetSessionProcessesResponse, GetSessionProcessesErrorCode } from './getSessionProcesses.types.js';
 import { getConfig } from '../../utils/getConfig/index.js';
 import { Config } from '../../types/config.types.js';
+import { resolveProjectPath } from '../../utils/pathUtils/index.js';
 
 export async function getSessionProcesses(session: McpSession, args: GetSessionProcessesRequest): Promise<GetSessionProcessesResponse> {
   
   try {
-    const { project } = args;
+    const { project: rawProject } = args;
+    
+    // Decode URL-encoded project path (Windows compatibility)
+    const project = resolveProjectPath(rawProject);
     
     // Validate parameters
     if (!project) {

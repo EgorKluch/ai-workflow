@@ -1,99 +1,138 @@
-# NOTE: Core processes intentionally do not have CRITICAL HELP CRITERION - this is an exception
-# as core processes require autonomous operation without external clarification calls
-
 core: 
   processes:
     clarifySession:
       purpose: "Resolve information gaps by first consulting user with clear questions, then executing targeted process iterations, and escalating only if automated resolution fails"
       prompt: |
+        role: You are a problem resolution specialist focused on clarifying uncertainties and guiding workflow decisions.
+        
         REQUIRED INPUT: Problem context describing specific uncertainty that triggered clarification need.
         
-        Tasks: Analyze problem context → formulate user questions → present structured questions → process user responses → execute runIteration → evaluate results → escalate if needed
+        Tasks:
+        1. Analyze problem context to identify specific information gaps and uncertainty types
+        2. Formulate clear, specific questions for user consultation with context about why information is needed
+        3. Present user questions in structured format explaining what decision or action depends on their answer
+        4. Process user responses and transform them into actionable iteration context for process execution
+        5. Execute runSessionIteration with appropriate processes based on user guidance and evaluate results
         
         User consultation: Ask specific questions explaining why information is needed and what decision depends on the answer. Provide concrete options when appropriate.
         
         Process execution: Select processes aligned with user guidance. Transform responses into actionable iteration context.
         
-        HOW TO RESPOND (MAX 5 lines each):
-        • **Uncertainty Identified**: Specific gap or ambiguity requiring clarification
-        • **User Questions**: Clear, contextual questions with explanation of why information is needed
-        • **User Guidance Received**: Summary of user responses and how they inform next steps
-        • **Processes Executed**: Selected processes with rationale based on user guidance
-        • **Resolution Status**: Whether uncertainty resolved or requires further user involvement
+        HELP NEEDED WHEN:
+        - Problem context is too broad to determine specific processes?
+        - User provides contradictory information?
+        - Selected processes don't lead to uncertainty resolution?
+        - Iteration results create new uncertainties?
+        - Automatic resolution is not possible?
+        
+        HOW TO RESPOND: Structured response no more than 50 lines.
 
     planSessionIteration:
-      purpose: "Analyze session state, detect critical blockers, and determine next workflow steps with comprehensive blocker resolution"
+      purpose: "Analyze session state and determine next workflow steps based on current progress and existing blockers"
       prompt: |
-        Tasks: Read session file → evaluate progress vs goal → detect critical blockers → classify blockers → determine next steps
+        role: You are a workflow orchestrator analyzing session state and determining optimal next steps.
         
-        ENHANCED BLOCKER DETECTION (as SOLE blocker detection mechanism):
-        1. Systematic Session Analysis: Parse all sections for potential blockers
-        2. Cross-Reference Analysis: Check for conflicting information across sections  
-        3. Implementation Readiness: Assess if sufficient information for implementation
-        4. Risk Assessment: Identify high-risk decisions needing user input
+        Tasks:
+        1. Read session file and parse session goal to determine success criteria and completion requirements
+        2. Check existing blockers in session file (blockers.needToUserApprove and blockers.needToClarify sections)
+        3. Evaluate current progress against goal requirements by analyzing session content and completed work
+        4. Assess information completeness and readiness for next development steps or remaining gaps
+        5. Determine optimal next workflow steps using decision tree based on progress and blocker analysis
         
-        CRITICAL BLOCKER DETECTION:
-        1. Scope Analysis: Check unresolved elements in blockers.needToUserApprove
-        2. Requirement Conflicts: Find contradictory/ambiguous requirements
-        3. Technical Dependencies: Find critical decisions without resolution
-        4. Implementation Blockers: Find architectural/dependency issues
-        
-        BLOCKER CLASSIFICATION:
-        • USER_DECISION_REQUIRED → blockers.needToUserApprove: business decisions, scope changes, architecture choices
-        • CLARIFY_RESOLVABLE → blockers.needToClarify: technical details, non-critical ambiguities, process questions
+        SESSION ANALYSIS:
+        1. Parse session goal to determine success criteria
+        2. Evaluate current progress against goal requirements by analyzing session content
+        3. Check existing blockers in session file (blockers.needToUserApprove and blockers.needToClarify)
+        4. Assess information completeness for next steps
         
         DECISION TREE:
-        1. Goal Complete? → execute runSessionIteration({processes: ['qualityAssurance']})
-        2. USER_DECISION_REQUIRED blockers? → Stop progress, request user decisions
-        3. CLARIFY_RESOLVABLE blockers? → call clarifySession({context: blocker description})
-        4. Information Missing? → call clarifySession({context: gap description})
-        5. Information Sufficient? → execute runSessionIteration({processes: ['codeImplementation']})
+        1. Unresolved USER_DECISION_REQUIRED blockers in session? → Stop progress, request user decisions for those specific blockers
+        2. Unresolved CLARIFY_RESOLVABLE blockers in session? → call clarifySession({context: blocker descriptions})
+        3. No unresolved blockers AND Goal Complete? → execute runSessionIteration({processes: ['qualityAssurance']})
+        4. No unresolved blockers AND information sufficient? → execute runSessionIteration({processes: ['codeImplementation']})
+        5. No unresolved blockers BUT information missing? → execute runSessionIteration({processes: [appropriate analysis processes]})
         
         Available processes: {{AVAILABLE_PROCESSES}}
         
-        HOW TO RESPOND (MAX 5 lines for each blocker):
-        If blockers detected:
-        • **Critical Blockers Detected**: [USER_DECISION_REQUIRED/CLARIFY_RESOLVABLE]
-        • **Blocker Details**: Specific description of what needs resolution
-        • **Business Impact**: Why this blocks progress and consequences
-        • **Resolution Required**: What user needs to decide or what needs clarification
-        • **Recommended Action**: Specific next step - user consultation or clarifySession call
+        HELP NEEDED WHEN:
+        - Session file structure is unclear or contradictory?
+        - Progress relative to goal cannot be determined?
+        - Available processes don't match identified needs?
+        - User decisions are insufficient to continue?
+        - Existing blockers in session are unclear or malformed?
+        
+        HOW TO RESPOND: Structured response no more than 50 lines.
+
+    resolveSessionBlockers:
+      purpose: "Analyze encountered blockers, classify them, update session with blockers, and determine resolution strategy"
+      prompt: |
+        role: You are a blocker resolution specialist handling critical workflow interruptions.
+        
+        INTERRUPTION CONTEXT: A process has encountered blockers and called resolveSessionBlockers() to stop execution.
+        
+        Tasks:
+        1. Analyze encountered blockers from current process execution context to understand specific issues
+        2. Classify blockers into USER_DECISION_REQUIRED and CLARIFY_RESOLVABLE categories based on resolution approach
+        3. Update session file with structured blockers in appropriate sections (blockers.needToUserApprove and blockers.needToClarify)
+        4. Save session file with current progress and identified blockers for workflow continuity
+        5. Determine and execute resolution strategy based on blocker types (user consultation, clarifySession, or planSessionIteration)
+        
+        BLOCKER CLASSIFICATION:
+        • USER_DECISION_REQUIRED → blockers.needToUserApprove: business decisions, scope changes, architecture choices with business impact
+        • CLARIFY_RESOLVABLE → blockers.needToClarify: technical details, non-critical ambiguities, implementation questions resolvable through analysis
+        
+        RESOLUTION ALGORITHM:
+        1. Analyze encountered blockers from current process execution context
+        2. Classify blockers into USER_DECISION_REQUIRED and CLARIFY_RESOLVABLE categories  
+        3. Update session file with structured blockers in appropriate sections
+        4. Save session file with current progress and identified blockers
+        5. If USER_DECISION_REQUIRED blockers found: present structured questions to user explaining impact and needed decisions, then call planSessionIteration() after user responses
+        6. If ONLY CLARIFY_RESOLVABLE blockers found: call clarifySession({context: blocker descriptions})
+        7. If BOTH USER_DECISION_REQUIRED and CLARIFY_RESOLVABLE blockers found: handle USER_DECISION_REQUIRED first (step 5), then planSessionIteration() will handle remaining CLARIFY_RESOLVABLE blockers
+        8. After clarifySession completion: call planSessionIteration() to continue workflow
+        
+        CRITICAL: Stop current process execution - blocker resolution takes priority over process completion.
+        
+        HOW TO RESPOND: Structured response no more than 50 lines.
 
     updateSession:
       purpose: "Actualize session content with automatic critical blocker detection, information prioritization, and structural guidance"
       prompt: |
-        INFORMATION CLASSIFICATION FRAMEWORK:
-        • IMMUTABLE (preserve exactly): immutable.* sections - never modify content, only expand
-        • EVOLVING (update with current state): evolving.* sections - replace outdated content with current state
-        • CONSOLIDATABLE (merge redundant content): consolidatable.* sections - merge repetitive content, eliminate duplications
-        • EXPENDABLE (remove when obsolete): expendable.* sections - remove superseded or irrelevant content
+        role: You are a session file manager responsible for maintaining accurate, current session state.
         
-        CRITICAL BLOCKER MANAGEMENT:
-        When updating blockers section:
-        • Move USER_DECISION_REQUIRED items to blockers.needToUserApprove with clear business impact
-        • Move CLARIFY_RESOLVABLE items to blockers.needToClarify with context
-        • Mark implementation steps as blocked if dependent on unresolved blockers
-        • Preserve resolution requirements and add deadlines if time-sensitive
+        INFORMATION CLASSIFICATION & RULES:
+        • IMMUTABLE: immutable.* sections - never modify, only expand
+        • EVOLVING: evolving.* sections - replace with current understanding, NO historical data/markers
+        • CONSOLIDATABLE: consolidatable.* sections - merge redundant content, eliminate duplications
+        • EXPENDABLE: expendable.* sections - remove superseded/irrelevant content
+        
+        FORBIDDEN CONTENT: Status indicators ("✅ COMPLETED", "Implementation ready"), progress markers, completion timestamps, verification notes, phase references
+        REQUIRED: Current technical context, requirements, analysis WITHOUT historical completion markers
+        
+        Tasks:
+        1. Read and analyze session file to assess current structure and identify classification needs
+        2. Apply information classification rules and update EVOLVING sections with current understanding
+        3. Remove historical markers and status indicators, consolidate redundant content, and resolve contradictions
+        4. Update blocker sections with USER_DECISION_REQUIRED and CLARIFY_RESOLVABLE blockers in appropriate sections
+        5. Mark blocked implementation steps, ensure YAML compliance, and save updated session file
         
         ACTUALIZATION ALGORITHM:
-        1. Read/analyze session file → assess current structure → identify classification needs
-        2. Apply INFORMATION CLASSIFICATION → update EVOLVING content → preserve IMMUTABLE sections
-        3. Consolidate CONSOLIDATABLE content → remove EXPENDABLE items → resolve contradictions
-        4. Update blockers section with proper classification → mark blocked implementation steps
-        5. Ensure YAML compliance and logical organization → SAVE file
+        1. Read/analyze session file → assess structure → identify classification needs
+        2. Apply classification rules → update EVOLVING with current understanding
+        3. Remove historical markers/status → consolidate/remove content → resolve contradictions
+        4. Update blockers: USER_DECISION_REQUIRED → blockers.needToUserApprove, CLARIFY_RESOLVABLE → blockers.needToClarify
+        5. Mark blocked implementation steps → ensure YAML compliance → SAVE file
         
         CONTRADICTION RESOLUTION: User decisions > technical assumptions, explicit > implicit, recent > old, scope > features, tested > theoretical
         
         MANDATORY: Use file tools to update and SAVE session file. Provide brief structural recommendations.
         
-        HOW TO RESPOND (MAX 5 lines for each changed item):
-        • **STRUCTURE APPLIED**: How session file was reorganized according to recommended structure
-        • **IMMUTABLE PRESERVED**: [immutable.* sections preserved exactly]
-        • **EVOLVING UPDATED**: [evolving.* sections updated with current state]  
-        • **CONSOLIDATED**: [consolidatable.* sections merged and deduplicated]
-        • **EXPENDABLE REMOVED**: [expendable.* obsolete content removed]
-        • **BLOCKERS ORGANIZED**: [needToUserApprove and needToClarify items structured]
-        • **RECOMMENDATIONS**: Brief guidance on session file organization and next steps
+        HELP NEEDED WHEN:
+        - Contradictions cannot be resolved automatically?
+        - Information classification is ambiguous?
+        - Blockers require user intervention for proper classification?
+        
+        HOW TO RESPOND: Structured response no more than 50 lines.
 
   templates:
     runSessionIteration:
@@ -122,13 +161,19 @@ core:
         Apply this context to refine your process execution for more precise results.
 
       mandatoryCompletion: |
-        MANDATORY COMPLETION SEQUENCE:
-        After completing all processes above:
-        1. Call updateSession() to save your progress and findings
-        2. After updateSession completion, call planSessionIteration() to determine next steps
-        3. Follow the instructions returned by planSessionIteration
+        COMPLETION LOGIC:
+        IMPORTANT: Each process may call resolveSessionBlockers() if blockers are found during execution.
+        
+        If resolveSessionBlockers() was called:
+        - Follow its instructions immediately, stop process execution
+        - Blocker resolution takes priority over process completion
+        
+        If no resolveSessionBlockers() calls during execution:
+        - After all processes complete: call updateSession() to save progress
+        - After updateSession completion: call planSessionIteration() to determine next steps
+        - Follow the instructions returned by planSessionIteration
 
-        This sequence ensures proper workflow continuation and context preservation.
+        This ensures proper blocker handling and workflow continuation.
 
     clarifySessionExtensions:
       purpose: "Template extensions for clarifySession prompt"

@@ -102,10 +102,9 @@ tools:
             - "LLM: Execute all specified processes using their prompts provided by MCP"
             - "LLM: CRITICAL: Follow each process's HOW TO RESPOND format exactly (bullet points, markdown bold, max 5 lines each)"
             - "LLM: Apply context filtering if context parameter provided"
-            - "LLM: After execution completion, call updateSession() to get session update procedure"
-            - "LLM: Execute the session update procedure to analyze and save progress"
-            - "LLM: After session update completion, call planSessionIteration() to determine next steps"
-            - "LLM: Follow the next steps returned by planSessionIteration"
+            - "LLM: IMPORTANT: Each process may call resolveSessionBlockers() if blockers are found during execution"
+            - "LLM: If resolveSessionBlockers() was called: follow its instructions immediately, stop process execution"
+            - "LLM: If no resolveSessionBlockers() calls: after all processes complete, call updateSession() then planSessionIteration()"
         context:
           type: "string"
           description: "Echo of input context parameter"
@@ -119,8 +118,41 @@ tools:
        - "MCP: Prepare unified execution prompt with process instructions and response requirements"
        - "MCP: Include critical response requirements ensuring HOW TO RESPOND format compliance"
        - "MCP: Include context guidance if context parameter provided"
-       - "MCP: Add mandatory updateSession() + planSessionIteration() call sequence to prompt"
+       - "MCP: Add resolveSessionBlockers() availability information and conditional execution logic"
+       - "MCP: Add fallback updateSession() + planSessionIteration() sequence for no-blocker scenarios"
        - "MCP: Return structured result with prompt, context, and process definitions"
+
+  resolveSessionBlockers:
+    purpose: "Analyze encountered blockers, classify them, update session with blockers, and determine resolution strategy"
+    signature: "resolveSessionBlockers()"
+    toolType: "promptReturningTools"
+    description: "Central blocker management tool called by processes when blockers are encountered during execution"
+    
+    inputData:
+      none: "No input parameters - LLM analyzes process results from conversation context"
+      
+    outputData:
+      success:
+        prompt:
+          type: "string"
+          description: "Blocker resolution strategy algorithm for LLM"
+          algorithmContent:
+            - "LLM: Analyze encountered blockers from current process execution context"
+            - "LLM: Classify blockers into USER_DECISION_REQUIRED and CLARIFY_RESOLVABLE categories"
+            - "LLM: Update session file with structured blockers in blockers.needToUserApprove and blockers.needToClarify sections"
+            - "LLM: Save session file with current progress and identified blockers"
+            - "LLM: If USER_DECISION_REQUIRED blockers found: present structured questions to user explaining impact and needed decisions"
+            - "LLM: If only CLARIFY_RESOLVABLE blockers found: call clarifySession({context: blocker descriptions})"
+            - "LLM: After user responses to questions: call planSessionIteration() to continue workflow"
+            - "LLM: IMPORTANT: Stop current process execution, blocker resolution takes priority"
+          
+          algorithm:
+        - "MCP: Load blocker resolution prompt from core.yaml"
+        - "MCP: Prepare blocker resolution prompt with classification guidelines and decision tree"
+        - "MCP: Include session update requirements for structured blocker management"
+        - "MCP: Add user consultation procedures for USER_DECISION_REQUIRED blockers"
+        - "MCP: Add process execution interruption logic for immediate blocker handling"
+        - "MCP: Return blocker management algorithm prompt"
 
   updateSession:
     purpose: "Return prompt for session state update procedure with critical blocker management and structural guidance"
@@ -217,7 +249,7 @@ tools:
     purpose: "Analyze session state, detect critical blockers, and determine next workflow steps with comprehensive blocker resolution"
     signature: "planSessionIteration()"
     toolType: "promptReturningTools"
-    description: "Strategic planning tool that determines next workflow steps based on session progress and critical blocker analysis as the SOLE blocker detection mechanism"
+    description: "Strategic planning tool that determines next workflow steps based on session progress and blocker analysis (now works with resolveSessionBlockers for structured blocker handling)"
     
     inputData:
       none: "No input parameters - LLM uses session path from context"
@@ -230,21 +262,20 @@ tools:
           algorithmContent:
             - "LLM: Read session file and parse session goal to determine success criteria"
             - "LLM: Evaluate current progress against goal requirements by analyzing session content" 
-            - "LLM: CRITICAL: Detect and analyze critical blockers using enhanced detection algorithm as SOLE blocker detection mechanism"
-            - "LLM: Classify blockers as USER_DECISION_REQUIRED (blockers.needToUserApprove) or CLARIFY_RESOLVABLE (blockers.needToClarify)"
+            - "LLM: Analyze existing blockers in session file (blockers.needToUserApprove and blockers.needToClarify)"
+            - "LLM: If unresolved USER_DECISION_REQUIRED blockers found: stop progress, request user decisions"
+            - "LLM: If unresolved CLARIFY_RESOLVABLE blockers found: call clarifySession({context: blocker description})"
             - "LLM: If session goal fully achieved: execute runSessionIteration({processes: ['qualityAssurance']})"
-            - "LLM: If USER_DECISION_REQUIRED blockers found: stop progress, request user decisions"
-            - "LLM: If CLARIFY_RESOLVABLE blockers found: call clarifySession({context: blocker description})"
             - "LLM: If no blockers and information sufficient: execute runSessionIteration({processes: ['codeImplementation']})"
-            - "LLM: If information missing: call clarifySession({context: gap description})"
+            - "LLM: If information missing: execute runSessionIteration({processes: [appropriate analysis processes]})"
         processes:
           type: "object"
           description: "Available processes for strategic selection (from getSessionProcesses)"
     
       algorithm:
        - "MCP: Get available processes via getSessionProcesses()"
-       - "MCP: Prepare strategic planning prompt with enhanced critical blocker detection logic"
-       - "MCP: Include decision tree with blocker classification and resolution paths"
+       - "MCP: Prepare strategic planning prompt with session-based blocker analysis logic"
+       - "MCP: Include decision tree with blocker resolution paths based on session state"
        - "MCP: Return structured result with planning algorithm and process options"
 
 # === WORKFLOW EXECUTION PATTERN ===
@@ -259,15 +290,15 @@ workflowPattern:
   standardCycle:
     steps:
       1: "Process execution (runSessionIteration)"
-      2: "State update (updateSession - called automatically within runSessionIteration)"
-      3: "Next iteration planning (planSessionIteration - called automatically within runSessionIteration)"
+      2: "Blocker handling (processes call resolveSessionBlockers() if blockers found, blocks runSessionIteration until resolved)"
+      3: "Next iteration planning (planSessionIteration - called after processes complete or blockers resolved)"
       4: "Cycle repetition (following planSessionIteration instructions)"
     
     flowControl:
       normal: "runSessionIteration → updateSession → planSessionIteration → runSessionIteration"
-      withBlockers: "planSessionIteration (detects blockers) → handles USER_DECISION_REQUIRED (user consultation) or CLARIFY_RESOLVABLE (clarifySession)"
-      blockerResolution: "clarifySession → runSessionIteration → updateSession → planSessionIteration → (re-evaluate blockers)"
-      uncertainty: "planSessionIteration → clarifySession → runSessionIteration → updateSession → planSessionIteration"
+      withUserBlockers: "runSessionIteration → [process calls resolveSessionBlockers] → user consultation → planSessionIteration"
+      withClarifyBlockers: "runSessionIteration → [process calls resolveSessionBlockers] → clarifySession → runSessionIteration"
+      mixedBlockers: "runSessionIteration → [process calls resolveSessionBlockers] → user consultation → clarifySession → runSessionIteration"
       completion: "planSessionIteration → runSessionIteration({processes: ['qualityAssurance']}) → [potential termination]"
   
   keyProcesses:
@@ -313,26 +344,29 @@ blockerSystem:
         resolution: "Automated analysis via clarifySession process"
   
   detectionAlgorithm:
-    responsibility: "planSessionIteration process performs critical blocker detection as SOLE detection mechanism"
+    responsibility: "Individual processes detect blockers during execution and call resolveSessionBlockers()"
     methodology:
-      1: "Systematic Session Analysis - Parse all sections for potential blockers"
-      2: "Cross-Reference Analysis - Check for conflicting information across sections"
-      3: "Implementation Readiness - Assess if sufficient information for implementation"
-      4: "Risk Assessment - Identify high-risk decisions needing user input"
+      1: "In-Process Detection - Each process identifies blockers as they execute their tasks"
+      2: "Immediate Escalation - Process calls resolveSessionBlockers() immediately when blockers are encountered"
+      3: "Blocker Classification - resolveSessionBlockers categorizes blockers as USER_DECISION_REQUIRED or CLARIFY_RESOLVABLE"
+      4: "Session Integration - resolveSessionBlockers updates session file with structured blocker information"
+      5: "Resolution Strategy - resolveSessionBlockers determines appropriate resolution path and stops process execution"
     
-  managementWorkflow:
-    detection: "planSessionIteration identifies and classifies blockers using integrated detection algorithm"
-    preservation: "updateSession manages, preserves blocker context, and provides structural guidance"
-    structuralGuidance: "updateSession provides recommendations for logical session file organization"
-    resolution: "clarifySession handles CLARIFY_RESOLVABLE blockers via user consultation"
-    escalation: "USER_DECISION_REQUIRED blockers stop progress until user provides decisions"
+      managementWorkflow:
+      detection: "Individual processes identify blockers during execution and call resolveSessionBlockers()"
+      interruption: "resolveSessionBlockers immediately stops process execution when called"
+      classification: "resolveSessionBlockers categorizes blockers as USER_DECISION_REQUIRED or CLARIFY_RESOLVABLE"
+      preservation: "resolveSessionBlockers updates session with structured blocker information"
+      resolution: "resolveSessionBlockers handles USER_DECISION_REQUIRED (user consultation) and CLARIFY_RESOLVABLE (clarifySession) blockers"
+      escalation: "USER_DECISION_REQUIRED blockers trigger structured user consultation via resolveSessionBlockers"
     
-  workflowIntegration:
-    principle: "Blockers override progress assumptions and force resolution before continuation"
-    priority: "Blocker resolution takes precedence over feature implementation"
-    safety: "No implementation proceeds while critical blockers remain unresolved"
-    structure: "Blockers organized in logical session structure with top-level sections for better classification and management"
-    classification: "Session organized by immutable, evolving, consolidatable, expendable sections to guide updateSession processing"
+      workflowIntegration:
+      principle: "Blockers immediately interrupt process execution and force resolution before continuation"
+      priority: "Blocker resolution takes precedence over process completion"
+      safety: "No process continues while critical blockers remain unresolved"
+      interruption: "resolveSessionBlockers() calls immediately stop current process execution"
+      structure: "Blockers organized in logical session structure with top-level sections for better classification and management"
+      classification: "Session organized by immutable, evolving, consolidatable, expendable sections to guide updateSession processing"
 
 # === INTEGRATION REQUIREMENTS ===
 integration:

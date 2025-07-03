@@ -3,11 +3,15 @@ import { RunSessionIterationRequest, RunSessionIterationResponse, RunSessionIter
 import { getConfig, getCoreConfig } from '../../utils/getConfig/index.js';
 import { Config } from '../../types/config.types.js';
 import { CoreConfig } from '../../types/core.types.js';
+import { resolveProjectPath } from '../../utils/pathUtils/index.js';
 
 export async function runSessionIteration(session: McpSession, args: RunSessionIterationRequest): Promise<RunSessionIterationResponse> {
   
   try {
-    const { project, processes, context } = args;
+    const { project: rawProject, processes, context } = args;
+    
+    // Decode URL-encoded project path (Windows compatibility)
+    const project = resolveProjectPath(rawProject);
     
     // Validate parameters
     if (!project) {

@@ -345,60 +345,98 @@ The system includes automatic detection and classification of critical blockers 
 
 ### Session Structure with Blocker Management
 
-```yaml
 # Recommended logical session structure
 goal: "Implement user authentication system"
 
 # IMMUTABLE sections (preserved exactly)
 immutable:
   scopeBoundaries:
-    inScope: "User authentication system, Basic user profile management"
-    outOfScope: "Advanced user analytics, Third-party integrations"
+    inScope: 
+      authentication:
+        basic: "User login/logout functionality"
+        sessions: "Session management and persistence"
+      userManagement:
+        profiles: "Basic user profile management"
+        validation: "Input validation and sanitization"
+    outOfScope: 
+      analytics: "Advanced user analytics and reporting"
+      integrations: "Third-party authentication providers"
 
-  userDecisions: "No information"
-  constraints: "No information"
-  successCriteria: "No information"
-  architecturalDecisions: "No information"
+  userDecisions: 
+    security:
+      hashing: "Use bcrypt for password hashing with salt rounds of 12"
+      sessions: "JWT tokens with 24-hour expiration, refresh token rotation"
+    architecture:
+      database: "PostgreSQL for user data persistence"
+      caching: "Redis for session storage and rate limiting"
+      
+  constraints: 
+    performance: "Authentication response time under 200ms"
+    security: "OWASP compliance for authentication flows"
+    
+  successCriteria: 
+    functionality: "Users can register, login, logout, and manage basic profiles"
+    security: "All authentication flows properly secured and validated"
+    testing: "Manual testing procedures for all authentication scenarios"
+    
+  architecturalDecisions: 
+    sessionStorage: "JWT with Redis backing for scalability"
+    passwordPolicy: "Minimum 8 characters with complexity requirements"
 
 # EVOLVING sections (updated with current state)
 evolving:
   technicalContext:
-    currentArchitecture: "Node.js + React + PostgreSQL"
-    patterns: "service layer, event-driven architecture"
-    dependencies: "existing auth system"
+    currentArchitecture: 
+      system: "Node.js + React + PostgreSQL"
+      patterns: "Service layer architecture with event-driven components"
+      security: "Helmet.js for headers, express-rate-limit for protection"
+    dependencies:
+      core: "Express.js web framework with TypeScript"
+      authentication: "Passport.js for authentication strategies"
+      database: "Prisma ORM for PostgreSQL interactions"
+      validation: "Joi for request validation and sanitization"
 
   requirements:
-    functional: "login, logout, profile management"
-    nonFunctional: "security, performance"
+    functional:
+      authentication: "Secure user registration, login, logout workflows"
+      sessions: "Persistent session management with automatic expiration"
+      profiles: "Basic user profile viewing and editing capabilities"
+    nonFunctional:
+      security: "HTTPS enforcement, rate limiting, input sanitization"
+      performance: "Sub-200ms authentication response times"
+      usability: "Clear error messages and intuitive authentication flows"
 
   progressState:
-    completed: []
     inProgress: 
-      - "authentication analysis"
+      - "authentication analysis: Reviewing existing auth patterns and security requirements"
     pending: 
-      - "implementation"
+      - "implementation: Building authentication middleware and user models"
+      - "testing: Manual verification of authentication workflows"
 
-  analysisResults: "No information"
+  analysisResults: 
+    securityAssessment: "Existing system lacks comprehensive authentication - requires full implementation"
+    integrationPoints: "Auth system must integrate with existing user management and session handling"
 
 # BLOCKER MANAGEMENT (special handling)
+# CRITICAL: ALL BLOCKERS MUST BE RESOLVED - no permanent blocking allowed  
+# needToUserApprove: requires user decision/approval to proceed
+# needToClarify: requires clarification but can be resolved through clarifySession()
 blockers:
   needToUserApprove:
-    - "Business decision required: Password reset functionality - Impact: affects core auth system security"
-    - "Scope change needed: Social login integration - Approval: expand scope or defer to future"
+    - "Business decision required: Password reset functionality - Impact: affects core auth system security and user experience flows"
+    - "Scope change needed: Social login integration - Approval: expand scope to include OAuth providers or defer to future iteration"
   needToClarify:
-    - "Technical question: Hashing algorithm selection - Context: security compliance requirements"
-    - "Implementation approach: Session management strategy - Options: JWT vs server-side sessions"
+    - "Technical question: Rate limiting strategy - Context: need to define specific limits for login attempts and account creation"
+    - "Implementation approach: Session cleanup strategy - Options: automatic cleanup vs manual cleanup vs hybrid approach"
 
 # CONSOLIDATABLE sections (merge similar content)
 consolidatable:
-  implementationNotes: "No information"
+  implementationNotes: 
+    security: "Implement comprehensive input validation and sanitization for all authentication endpoints"
+    testing: "Create manual testing procedures for successful auth flows, failure scenarios, and edge cases"
 
 # EXPENDABLE sections (can become obsolete)
 expendable:
-  workingNotes: "No information"
-  debugInfo: []
-```
-
-**System Response**:
-- **BLOCKED**: Password reset and social login require user decisions (needToUserApprove)
-- **AUTOMATED**: Technical questions resolved through clarifySession (needToClarify) 
+  workingNotes: 
+    discovery: "Initial analysis complete - identified security gaps and integration requirements"
+  debugInfo: [] 

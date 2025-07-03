@@ -3,11 +3,15 @@ import { existsSync, unlinkSync, writeFileSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { CreateSessionRequest, CreateSessionResponse, CreateSessionErrorCode } from './createSession.types.js';
 import { planSessionIteration } from '../planSessionIteration/planSessionIteration.js';
+import { resolveProjectPath } from '../../utils/pathUtils/index.js';
 
 export async function createSession(session: McpSession, args: CreateSessionRequest): Promise<CreateSessionResponse> {
   
   try {
-    const { project, sessionPath } = args;
+    const { project: rawProject, sessionPath } = args;
+    
+    // Decode URL-encoded project path (Windows compatibility)
+    const project = resolveProjectPath(rawProject);
     
     // Validate parameters
     if (!project) {
@@ -69,13 +73,15 @@ evolving:
     nonFunctional: "No information" # performance, security, usability requirements
   
   progressState:
-    completed: []
     inProgress: []
     pending: []
   
   analysisResults: "No information" # key findings from various analyses
 
 # BLOCKER MANAGEMENT (special handling)
+# CRITICAL: ALL BLOCKERS MUST BE RESOLVED - no permanent blocking allowed
+# needToUserApprove: requires user decision/approval to proceed
+# needToClarify: requires clarification but can be resolved through clarifySession()
 blockers:
   needToUserApprove: []
   needToClarify: []

@@ -7,6 +7,7 @@ import { runSessionIteration, RunSessionIterationRequest } from './tools/runSess
 import { getSessionProcesses, GetSessionProcessesRequest } from './tools/getSessionProcesses/index.js';
 import { updateSession, UpdateSessionRequest } from './tools/updateSession/index.js';
 import { clarifySession, ClarifySessionRequest } from './tools/clarifySession/index.js';
+import { resolveBlockers, ResolveBlockersRequest } from './tools/resolveBlockers/index.js';
 import { planSessionIteration, PlanSessionIterationRequest } from './tools/planSessionIteration/index.js';
 
 export class SessionManagerMcpServer {
@@ -122,6 +123,22 @@ export class SessionManagerMcpServer {
     }, async (session: McpSession, request: CallToolRequest) => {
       const args = request.params.arguments as unknown as ClarifySessionRequest;
       const result = await clarifySession(session, args);
+      return session.getResult(result);
+    });
+
+    // Add resolveBlockers tool (promptReturningTool)
+    this.builder.addTool({
+      name: 'resolveSessionBlockers',
+      description: 'Analyze encountered blockers, classify them, update session with blockers, and determine resolution strategy',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+        required: [],
+        additionalProperties: false
+      }
+    }, async (session: McpSession, request: CallToolRequest) => {
+      const args = request.params.arguments as ResolveBlockersRequest;
+      const result = await resolveBlockers(session, args);
       return session.getResult(result);
     });
 

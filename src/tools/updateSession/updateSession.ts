@@ -2,11 +2,15 @@ import { McpSession } from 'flowmcp';
 import { UpdateSessionRequest, UpdateSessionResponse, UpdateSessionErrorCode } from './updateSession.types.js';
 import { getCoreConfig } from '../../utils/getConfig/index.js';
 import { CoreConfig } from '../../types/core.types.js';
+import { resolveProjectPath } from '../../utils/pathUtils/index.js';
 
 export async function updateSession(session: McpSession, args: UpdateSessionRequest): Promise<UpdateSessionResponse> {
   
   try {
-    const { project } = args;
+    const { project: rawProject } = args;
+    
+    // Decode URL-encoded project path (Windows compatibility)
+    const project = resolveProjectPath(rawProject);
     
     // Validate parameters
     if (!project) {

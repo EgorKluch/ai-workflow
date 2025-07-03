@@ -3,11 +3,15 @@ import { ClarifySessionRequest, ClarifySessionResponse, ClarifySessionErrorCode 
 import { getCoreConfig, getConfig } from '../../utils/getConfig/index.js';
 import { Config } from '../../types/config.types.js';
 import { CoreConfig } from '../../types/core.types.js';
+import { resolveProjectPath } from '../../utils/pathUtils/index.js';
 
 export async function clarifySession(session: McpSession, args: ClarifySessionRequest): Promise<ClarifySessionResponse> {
   
   try {
-    const { project, context } = args;
+    const { project: rawProject, context } = args;
+    
+    // Decode URL-encoded project path (Windows compatibility)
+    const project = resolveProjectPath(rawProject);
     
     // Validate parameters
     if (!project) {
