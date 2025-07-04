@@ -1,5 +1,7 @@
-import { ProcessesConfig } from './processes.types.js';
+import { ProcessConfig } from './processes.types.js';
 
-export type Config = {
-  config: ProcessesConfig;
-}; 
+export interface Config {
+  config: {
+    processes: Record<string, ProcessConfig>;
+  };
+} 

@@ -1,8 +1,7 @@
 export interface PlanSessionIterationRequest {
-  // No input parameters - LLM uses session path from context
+  project: string; // Project path for config resolution (required)
 }
 
 export interface PlanSessionIterationResponse {
-  prompt: string;
-  processes: Record<string, string>; // processName -> purpose mapping
+  prompt: string; // Planning algorithm prompt with available processes and requirements
 } 

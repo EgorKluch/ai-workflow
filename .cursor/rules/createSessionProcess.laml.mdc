@@ -1,0 +1,373 @@
+---
+description: Automated generation of specialized workflow processes based on user requirements with session-based orchestration and comprehensive documentation
+globs: 
+alwaysApply: true
+---
+```yaml
+$meta:
+  name: 'createSessionProcess'
+  goal: 'automatedWorkflowGeneration'
+  domain: 'workflow.process.generation'
+  apply: 'sessionManagerProjects'
+  version: 1.0
+  purpose: "Automated generation of specialized workflow processes based on user requirements with session-based orchestration and comprehensive documentation"
+  domains:
+    - 'workflow.process.generation'
+    - 'session.workflow.automation'
+    - 'development.workflow.orchestration'
+
+# === WORKFLOW PRINCIPLES ===
+workflowPrinciples:
+  purpose: "Core understanding of session-based workflow execution for process generation"
+  
+  fullAutomation:
+    principle: "LLM autonomously executes complete workflow from user request to implementation"
+    implementation: "Generated processes enable systematic, automated execution through all necessary stages"
+    benefit: "Developer provides high-level goal, system executes everything automatically with minimal intervention"
+  
+  systematicProgression:
+    principle: "Each process analyzes session state to determine if goal is achieved and decide next steps"
+    implementation: "Processes evaluate progress, detect critical gaps, and determine whether to continue or interrupt workflow"
+    benefit: "Intelligent workflow execution based on actual progress rather than rigid predefined sequences"
+  
+  contextPreservation:
+    principle: "Every process completion updates session state for intelligent next step analysis" 
+    implementation: "Session files maintain workflow state, decisions, context, and progress across process executions"
+    benefit: "Preserved context enables intelligent progress analysis and goal-oriented execution"
+  
+  criticalGapPrevention:
+    principle: "Critical gaps must be detected and resolved before implementation to prevent wasted effort"
+    implementation: "Processes detect situations where workflow cannot proceed (missing decisions, scope conflicts, unresolved dependencies)"
+    benefit: "Prevents implementation of features with unresolved business decisions or technical dependencies"
+    
+    criticalGapTypes:
+      userDecisionRequired: "Business decisions, scope changes, architectural choices requiring explicit user approval"
+      clarifyResolvable: "Technical details, implementation ambiguities, non-critical questions resolvable through analysis"
+      examples:
+        userDecisionRequired: "Which payment provider to integrate? Should we support OAuth in addition to email auth?"
+        clarifyResolvable: "What's the exact API endpoint format? How should we handle edge case X in the existing codebase?"
+
+# === PRINCIPLES ===
+principles:
+  purpose: "Core beliefs for automated workflow process generation"
+
+  requirementDrivenGeneration:
+    belief: "Workflow processes should be generated based on specific user requirements and domain expertise"
+    application: "Analyze user requirements to identify workflow patterns and generate specialized processes"
+    benefits:
+      - "Processes tailored to specific domain needs and constraints"
+      - "Optimal workflow efficiency for targeted use cases"
+      - "Reduced configuration overhead through automation"
+
+  systemIntegrationFirst:
+    belief: "Generated processes must be compatible and integrate seamlessly with session-based workflow orchestration"
+    application: "All generated processes follow established workflow integration patterns and session management conventions"
+    benefits:
+      - "Immediate compatibility with existing workflow orchestration infrastructure"
+      - "Automatic session management and critical gap resolution"
+      - "Consistent error handling and validation patterns"
+
+  dualOutputGeneration:
+    belief: "Process generation must produce both executable configuration and business-focused workflow documentation"
+    application: "Generate config.yaml for workflow orchestration execution and PRD-style process documentation describing workflow behavior"
+    benefits:
+      - "Clear separation between technical execution and business workflow understanding"
+      - "Business-focused documentation explaining workflow logic and decision patterns"
+      - "Non-technical stakeholder comprehension of workflow behavior and outcomes"
+
+  blockerAwareDesign:
+    belief: "Generated processes must include intelligent workflow interruption when critical issues require resolution"
+    application: "Each process identifies situations where workflow cannot proceed without resolving critical gaps or decisions"
+    benefits:
+      - "Prevents wasted implementation effort on incomplete requirements"
+      - "Ensures critical business and technical decisions are made before execution"
+      - "Maintains workflow quality through systematic problem detection"
+
+# === RULES ===
+rules:
+  purpose: "Structure and requirements for automated process generation"
+
+  generationOutput:
+    requiredFiles:
+      configYaml: "Session-orchestration-compatible process definitions"
+      processDocumentation: "process.yaml - comprehensive workflow documentation"
+    
+    configYamlStructure:
+      rootWrapper: "config:"
+      processesSection: "config.processes.{processName}"
+      exactFormat: |
+        config:
+          processes:
+            processName:
+              purpose: "Single sentence description"
+              requirements: ["Optional list of prerequisites"]
+              prompt:
+                role: "Single sentence role description"
+                tasks:
+                  - "Bullet-pointed task description"
+                  - "Another task description"
+                actions:
+                  - trigger: "Critical gap detected that prevents workflow continuation?"
+                    action: "Stop execution and escalate for resolution"
+                respond: "Structured response no more than 50 lines."
+      compatibility: "Must integrate with session-based workflow orchestration system"
+      validation: "All processes must include critical gap detection and workflow interruption triggers"
+      
+    processDocumentationStructure:
+      format: "YAML document describing workflow behavior and process interactions (PRD-style)"
+      sections: ["principles", "workflowArchitecture", "processDefinitions", "executionPatterns", "blockerManagement", "qualityFramework"]
+      completeness: "Must document generated workflow behavior with focus on business logic and process interactions"
+
+  processArchitecture:
+    workflowTypes:
+      analysis: "Processes for understanding requirements, codebase, and context"
+      discovery: "Processes for technical exploration and pattern identification"
+      implementation: "Processes for actual code development and system changes"
+      validation: "Processes for quality assurance and compliance verification"
+      
+    workflowInterruption:
+      detection: "Each process must identify when critical gaps prevent continued execution"
+      classification: "Issues categorized as requiring user decision vs. resolvable through analysis"
+      principle: "Workflow stops when critical dependencies, scope conflicts, or business decisions remain unresolved"
+      
+    sessionBasedWorkflow:
+      contextPreservation: "Processes operate on persistent session files maintaining workflow state and progress"
+      structuredInformation: "Session files organize information into immutable decisions, evolving context, and temporary working data"
+      responseFormat: "All processes include structured response requirements for consistent workflow integration"
+
+  processDesign:
+    promptStructure:
+      role: "Clear role definition for process executor"
+      tasks: "Bulleted list of specific actions and responsibilities"
+      info: "Additional context and operational guidelines"
+      actions: "Workflow interruption triggers when critical issues are detected"
+      respond: "Structured response format requirements"
+      
+    requirementsSystem:
+      hints: "Process requirements provide contextual hints for planSessionIteration"
+      flexibility: "LLM can override requirements based on session analysis"
+      dependencies: "Logical prerequisites and workflow ordering guidance"
+      
+    qualityStandards:
+      singlePurpose: "Each process solves exactly one specific workflow challenge"
+      autonomousOperation: "Process can execute independently within defined scope"
+      criticalGapDetection: "Identifies situations where workflow cannot proceed without resolving dependencies or decisions"
+      responseCompliance: "Follows established response formatting and length requirements"
+
+# === WORKFLOWS ===
+workflows:
+  purpose: "Systematic approach to automated process generation"
+
+  processGenerationWorkflow:
+    analyze: "Extract workflow requirements from user specifications and domain context"
+    design: "Create process architecture with workflow types and blocker integration"
+    generate: "Produce both config.yaml and process documentation files"
+    validate: "Verify system compatibility and workflow integrity"
+    document: "Create comprehensive usage examples and integration guidance"
+
+  requirementAnalysis:
+    domainIdentification: "Identify specific domain and use case requirements"
+    workflowMapping: "Map requirements to analysis/discovery/implementation/validation stages"
+    criticalGapPrediction: "Anticipate common decision points and dependency scenarios requiring workflow interruption"
+    systemIntegration: "Ensure compatibility with existing session-based workflow orchestration"
+
+  architecturalDesign:
+    processDecomposition: "Break down workflow into independent, focused processes"
+    dependencyMapping: "Define process requirements and execution order hints"
+    workflowInterruptionDesign: "Design critical gap detection triggers and escalation patterns"
+    sessionStructure: "Define session file organization and information classification"
+
+# === SCENARIOS ===
+scenarios:
+  purpose: "Common situations for automated process generation"
+
+  domainSpecificWorkflow:
+    triggers:
+      - "Create workflow for [specific domain]"
+      - "Generate processes for [use case]"
+      - "Build specialized workflow"
+    description: "User needs domain-specific workflow processes generated"
+    workflow: "processGenerationWorkflow"
+    specialization:
+      analyze: "Deep analysis of domain requirements and workflow patterns"
+      design: "Create specialized process architecture for domain needs"
+      generate: "Produce optimized config.yaml and comprehensive documentation"
+      validate: "Verify domain-specific workflow effectiveness and system integration"
+    resources: ['domainRequirements', 'existingPatterns', 'workflowOrchestrationSystem']
+    outcomes: ['domainOptimizedConfig', 'specializedProcessDocumentation']
+
+  workflowCustomization:
+    triggers:
+      - "Customize workflow for [specific needs]"
+      - "Adapt processes for [constraints]"
+      - "Modify workflow behavior"
+    description: "User wants existing workflow patterns adapted for specific constraints"
+    workflow: "processGenerationWorkflow"
+    specialization:
+      analyze: "Identify customization requirements and constraint implications"
+      design: "Adapt process architecture to meet specific constraints"
+      generate: "Create customized configuration maintaining system compatibility"
+      validate: "Ensure customization maintains workflow integrity"
+    resources: ['customizationRequirements', 'constraintAnalysis', 'baseWorkflowPatterns']
+    outcomes: ['customizedConfig', 'adaptedProcessDocumentation']
+
+  workflowOptimization:
+    triggers:
+      - "Optimize workflow for [performance/efficiency]"
+      - "Streamline processes for [specific goals]"
+      - "Reduce workflow complexity"
+    description: "User wants workflow processes optimized for specific performance or efficiency goals"
+    workflow: "processGenerationWorkflow"
+    specialization:
+      analyze: "Identify optimization opportunities and performance bottlenecks"
+      design: "Create streamlined process architecture with improved efficiency"
+      generate: "Produce optimized configuration with performance enhancements"
+      validate: "Verify optimization maintains functionality while improving performance"
+    resources: ['performanceRequirements', 'optimizationPatterns', 'efficiencyMetrics']
+    outcomes: ['optimizedConfig', 'performanceDocumentation']
+
+# === STANDARDS ===
+standards:
+  purpose: "Quality requirements for automated process generation"
+
+  generationQuality:
+    completeness: "Generated processes must cover all required workflow stages"
+    systemCompatibility: "All processes must integrate seamlessly with session-based workflow orchestration"
+    criticalGapAwareness: "Every process must include appropriate workflow interruption mechanisms when critical issues arise"
+    documentationCompleteness: "Process documentation must explain all behavioral patterns"
+    
+  configurationIntegrity:
+    yamlCompliance: "Generated config.yaml must maintain proper YAML structure"
+    namingConsistency: "Process names follow camelCase convention"
+    structuralAlignment: "Configuration aligns with existing workflow orchestration infrastructure"
+    validationSupport: "All processes include proper validation and critical gap detection"
+
+  processDesignStandards:
+    singleResponsibility: "Each generated process has clear, focused responsibility"
+    autonomousOperation: "Processes can execute independently within defined scope"
+    workflowInterruptionIntegration: "Proper integration with workflow interruption system when critical gaps are detected"
+    responseFormatting: "Consistent response formatting and length requirements"
+    
+  documentationStandards:
+    workflowFocused: "Documentation describes workflow behavior, not technical implementation details"
+    businessLogicClarity: "Clear explanation of process purpose, decision points, and business outcomes"
+    processInteractionMapping: "Explains how processes collaborate and handoff work between stages"
+    executionPatternGuidance: "Documents when and why specific processes should be executed"
+
+  mustDo:
+    generateBothFiles: "MUST generate both config.yaml and PRD-style workflow documentation"
+    followExactYamlFormat: "MUST follow exact config.yaml format with config: wrapper and prompt object structure (NOT markdown strings)"
+    maintainSystemCompatibility: "MUST ensure session-based workflow orchestration compatibility"
+    includeCriticalGapDetection: "MUST include critical gap detection and workflow interruption in all processes"
+    followStructuralStandards: "MUST follow established configuration and documentation structure"
+    validateWorkflowIntegrity: "MUST verify generated workflow maintains system integrity"
+    focusOnWorkflowBehavior: "MUST document workflow behavior and business logic, not technical implementation details"
+
+  canDo:
+    customizeProcessBehavior: "MAY customize process behavior for specific requirements"
+    optimizeForPerformance: "MAY optimize process execution for performance requirements"
+    adaptResponseFormats: "MAY adapt response formats while maintaining core requirements"
+    customizeDocumentationStyle: "MAY adapt documentation style for specific stakeholder needs while maintaining PRD focus"
+    createDomainSpecificPatterns: "MAY create domain-specific workflow patterns and business logic templates"
+
+# === GOOD PRACTICES ===
+goodPractices:
+  purpose: "Recommended approaches for effective process generation"
+
+  requirementAnalysis:
+    thoroughDomainUnderstanding: "Deeply understand domain requirements before generation"
+    stakeholderConsideration: "Consider all stakeholders affected by generated workflow"
+    constraintIdentification: "Identify and document all relevant constraints"
+    patternReuse: "Leverage existing successful workflow patterns where applicable"
+    
+  processDesign:
+    clearResponsibilityDefinition: "Define clear, non-overlapping process responsibilities"
+    appropriateAbstractionLevel: "Design processes at appropriate abstraction level"
+    blockerAnticipation: "Anticipate and design for common blocker scenarios"
+    extensibilityConsideration: "Design processes for future extension and modification"
+    
+  implementationExecution:
+    incrementalGeneration: "Generate processes incrementally with validation at each step"
+    continuousValidation: "Validate system compatibility throughout generation process"
+    businessFocusedDocumentation: "Create PRD-style documentation explaining workflow behavior and business logic"
+    executionPatternExamples: "Provide clear examples of when and how processes should be executed"
+    
+      formatCompliance:
+      correctYamlStructure: "Always use config: wrapper with processes: section"
+      structuredPrompts: "Use prompt object with role, tasks, actions, respond fields - never markdown strings"
+      properActionsFormat: "Use actions as array of objects with trigger and action fields"
+      consistentNaming: "Use camelCase for process names following existing patterns"
+      
+    criticalGapDetectionExamples:
+      goodTriggers:
+        - "Requirements contain contradictory business rules that cannot be resolved automatically?"
+        - "Implementation approach requires architectural decisions with business impact?"
+        - "Critical dependencies are missing or conflict with existing systems?"
+        - "Scope boundaries are unclear and could lead to implementation of unintended features?"
+      goodActions:
+        - "Stop execution and escalate for user decision"
+        - "Interrupt workflow and request clarification"
+        - "Halt progress until dependencies are resolved"
+      badTriggers:
+        - "Need to call resolveSessionBlockers()" # Too technical
+        - "Blocker detected" # Too vague
+        - "Error occurred" # Not gap-specific
+      badActions:
+        - "Call updateSession() -> resolveSessionBlockers()" # Technical implementation detail
+
+# === BAD PRACTICES ===
+badPractices:
+  purpose: "Anti-patterns to avoid in process generation"
+
+  requirementMisunderstanding:
+    assumptionMaking: "DON'T make assumptions about unstated requirements"
+    domainOversimplification: "DON'T oversimplify complex domain requirements"
+    constraintIgnoring: "DON'T ignore or underestimate constraint implications"
+    patternForcing: "DON'T force inappropriate patterns onto specific requirements"
+    
+  processDesignFlaws:
+    responsibilityBlurring: "DON'T create processes with unclear or overlapping responsibilities"
+    criticalGapNeglect: "DON'T generate processes without proper critical gap detection and workflow interruption"
+    systemIncompatibility: "DON'T create processes incompatible with session-based workflow orchestration"
+    responseInconsistency: "DON'T create inconsistent response formats across processes"
+    
+  implementationShortcuts:
+    documentationSkipping: "DON'T skip business-focused workflow documentation creation"
+    technicalFocusOverBusiness: "DON'T create technical implementation documentation instead of workflow behavior documentation"
+    validationAvoiding: "DON'T avoid thorough validation of generated processes"
+    businessLogicOmission: "DON'T omit clear explanation of workflow decision points and business outcomes"
+    
+  formatViolations:
+    wrongYamlStructure: "DON'T generate config.yaml without config: wrapper"
+    markdownPrompts: "DON'T use markdown-formatted string prompts instead of structured prompt objects"
+    missingPromptFields: "DON'T omit role, tasks, actions, respond fields from prompt structure"
+    incorrectActionsFormat: "DON'T use wrong actions format - must be array of objects with trigger and action fields"
+
+# === WORKFLOW PATTERNS ===
+workflowPatterns:
+  purpose: "Common workflow patterns for process documentation"
+
+  analysisStagePatterns:
+    problemDefinition: "How processes establish clear problem statements and success criteria"
+    contextGathering: "Methods for comprehensive requirement and context collection"
+    stakeholderMapping: "Approaches for identifying affected users and decision makers"
+    constraintIdentification: "Systematic identification of technical and business limitations"
+    
+  discoveryStagePatterns:
+    technicalLandscape: "Understanding existing codebase, patterns, and architecture"
+    solutionExploration: "Evaluating implementation approaches and design alternatives"
+    dependencyAnalysis: "Mapping relationships between components and external systems"
+    riskEvaluation: "Assessing potential challenges and mitigation strategies"
+    
+  executionStagePatterns:
+    incrementalDelivery: "Breaking work into independent, verifiable phases"
+    qualityMaintenance: "Continuous quality assurance throughout development"
+    progressValidation: "Verification procedures at each development milestone"
+    blockerResolution: "Systematic handling of impediments and decision points"
+    
+  completionStagePatterns:
+    requirementValidation: "Confirming all requirements have been satisfied"
+    qualityAssurance: "Final compliance verification against established standards"
+    systemIntegration: "Validating proper integration with existing systems"
+    userAcceptance: "Ensuring solution meets user needs and expectations"
+```

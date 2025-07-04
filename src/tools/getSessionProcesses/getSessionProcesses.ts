@@ -25,7 +25,7 @@ export async function getSessionProcesses(session: McpSession, args: GetSessionP
     // Load processes from config.yaml
     let configData: Config;
     try {
-      configData = getConfig<Config>();
+      configData = getConfig<Config>(project);
     } catch (configError) {
       session.logger.addError({
         code: GetSessionProcessesErrorCode.CONFIG_LOAD_ERROR,

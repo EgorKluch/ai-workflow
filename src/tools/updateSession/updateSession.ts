@@ -25,7 +25,7 @@ export async function updateSession(session: McpSession, args: UpdateSessionRequ
     // Read session update prompt from core.yaml
     let coreConfigData: CoreConfig;
     try {
-      coreConfigData = getCoreConfig<CoreConfig>();
+      coreConfigData = getCoreConfig<CoreConfig>(project);
     } catch (configError) {
       session.logger.addError({
         code: UpdateSessionErrorCode.CONFIG_LOAD_ERROR,

@@ -20,7 +20,7 @@ export async function createSession(session: McpSession, args: CreateSessionRequ
         message: 'Project parameter is required',
         context: { arguments: args }
       });
-      return { processes: {}, prompt: '' };
+      return { prompt: '' };
     }
 
     if (!sessionPath) {
@@ -29,10 +29,8 @@ export async function createSession(session: McpSession, args: CreateSessionRequ
         message: 'sessionPath parameter is required',
         context: { arguments: args }
       });
-      return { processes: {}, prompt: '' };
+      return { prompt: '' };
     }
-
-
 
     // Check if file with sessionPath exists and delete it if it does
     const fullSessionPath = join(project, sessionPath);
@@ -72,10 +70,6 @@ evolving:
     functional: "No information" # what system must do
     nonFunctional: "No information" # performance, security, usability requirements
   
-  progressState:
-    inProgress: []
-    pending: []
-  
   analysisResults: "No information" # key findings from various analyses
 
 # BLOCKER MANAGEMENT (special handling)
@@ -99,7 +93,7 @@ expendable:
     writeFileSync(fullSessionPath, sessionTemplate, 'utf8');
 
     // Call planSessionIteration() internally
-    const planResult = await planSessionIteration(session, {});
+    const planResult = await planSessionIteration(session, { project });
     
     // Return planSessionIteration result directly without modification
     return planResult;
@@ -114,6 +108,6 @@ expendable:
       }
     });
     
-    return { processes: {}, prompt: '' };
+    return { prompt: '' };
   }
 } 

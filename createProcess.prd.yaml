@@ -1,0 +1,1065 @@
+$meta:
+  name: 'customWorkflowDevelopment'
+  goal: 'comprehensiveWorkflowCreationGuide'
+  domain: 'workflow.development.methodology'
+  version: 1.0
+  purpose: "Complete methodology for developing custom workflows using MCP tools with session-based orchestration"
+  created: "2024-12-19"
+  example: "config.yaml - comprehensive development workflow implementation"
+
+# === PRINCIPLES ===
+principles:
+  purpose: "Core principles governing custom workflow development using MCP tools"
+  
+  fullAutomation:
+    principle: "LLM + MCP tools provide complete automation from user request to implementation"
+    implementation: "Single user request triggers systematic, automated execution through all necessary processes"
+    benefits:
+      - "Developer provides high-level goal, system executes everything automatically"
+      - "Minimal human intervention during workflow execution"
+      - "Comprehensive automation across all development phases"
+    workflowIntegration: "MCP tools orchestrate entire workflow without manual process management"
+      
+  systematicProgression:
+    principle: "Each process analyzes session state to determine goal achievement and decide next steps"
+    implementation: "planSessionIteration tool analyzes session file, detects blockers, and provides instruction for next steps"
+    benefits:
+      - "Intelligent workflow execution based on actual session progress"
+      - "Goal-oriented execution with automatic completion detection"
+      - "Prevents critical gaps from affecting implementation quality"
+    workflowIntegration: "Session-based analysis drives all workflow decisions and progressions"
+      
+  contextualAdaptation:
+    principle: "Workflows adapt to specific domain requirements while maintaining core methodology"
+    implementation: "Core stages remain consistent, but tasks and actions adapt to domain specifics"
+    benefits:
+      - "Flexible methodology applicable to different project types"
+      - "Consistent quality standards across diverse implementations"
+      - "Efficient customization without losing proven patterns"
+    workflowIntegration: "Process requirements provide hints for intelligent adaptation"
+      
+  contextPreservation:
+    principle: "Every process completion updates session state for intelligent next step analysis"
+    implementation: "updateSession + planSessionIteration called after every process to analyze progress"
+    benefits:
+      - "Preserved context across workflow execution cycles"
+      - "Intelligent progress analysis and decision making"
+      - "Comprehensive workflow state management"
+    workflowIntegration: "Session files maintain all workflow state and enable cyclical execution"
+      
+  criticalGapResolution:
+    principle: "Critical blockers must be detected and resolved before implementation"
+    implementation: "Each process includes triggers for detecting critical gaps requiring external resolution"
+    benefits:
+      - "Prevents wasted effort on incomplete requirements"
+      - "Ensures timely escalation of blocking issues"
+      - "Maintains workflow integrity through systematic problem detection"
+    workflowIntegration: "Blockers immediately interrupt workflow and force resolution before continuation"
+      
+  cyclicalExecution:
+    principle: "Workflow is designed to run in continuous cycles until goal is achieved"
+    implementation: "runSessionIteration → updateSession → planSessionIteration → runSessionIteration cycle"
+    benefits:
+      - "Persistent execution that continues until development goal is fully completed"
+      - "Automatic workflow progression without manual intervention"
+      - "Comprehensive goal achievement through systematic cycles"
+    workflowIntegration: "Standard execution cycle repeats until final validation processes confirm completion"
+
+# === WORKFLOW ARCHITECTURE ===
+workflowArchitecture:
+  purpose: "Systematic architecture for developing custom workflows using MCP tools"
+  
+  stageProgression:
+    analysisStage:
+      purpose: "Establish clear understanding of problem, scope, and requirements"
+      exampleProcesses: ["problemAnalysis", "requirementsClarification"]
+      flexibleApproach: "Can include additional analysis processes like stakeholderMapping, competitorAnalysis, or userResearch"
+      outcomes: ["Clear problem definition", "Validated requirements", "Scope boundaries"]
+      
+    discoveryStage:
+      purpose: "Understand technical context and establish architectural foundation"
+      exampleProcesses: ["technicalDiscovery", "architecturalAnalysis"]
+      flexibleApproach: "Can be split into specialized processes like codebaseAnalysis, dependencyMapping, performanceAssessment"
+      outcomes: ["Technical landscape", "Architectural patterns", "Integration strategies"]
+      
+    planningStage:
+      purpose: "Define comprehensive implementation strategy with risk mitigation"
+      exampleProcesses: ["scenarioDefinition", "riskAssessment", "implementationPlanning"]
+      flexibleApproach: "Can include domain-specific planning like dataModelingPlanning, apiDesignPlanning, or uiDesignPlanning"
+      outcomes: ["User scenarios", "Risk mitigation", "Detailed implementation plan"]
+      
+    executionStage:
+      purpose: "Implement solution with systematic verification and quality assurance"
+      exampleProcesses: ["codeImplementation", "verificationTesting", "qualityAssurance"]
+      flexibleApproach: "Can be extended with specialized processes like performanceOptimization, securityValidation, or deploymentPreparation"
+      outcomes: ["Working implementation", "Verified functionality", "Quality compliance"]
+      
+  processInteraction:
+    sequentialDependencies: "Later stages depend on completion of earlier stages"
+    contextualRequirements: "Each process validates specific prerequisites before execution"
+    adaptiveExecution: "Process selection adapts based on session state and workflow needs"
+    
+  sessionBasedOrchestration:
+    contextPreservation: "Session files maintain workflow state across process executions"
+    progressTracking: "Each process updates session with decisions and progress"
+    blockerManagement: "Critical gaps trigger workflow interruption for resolution"
+    
+  mcpToolIntegration:
+    toolTypes:
+      promptReturningTools: "Tools that return textual prompts containing execution algorithms"
+      dataReturningTools: "Tools that return structured data for processing"
+    orchestrationTools:
+      - "createSession: Initialize workflow and trigger first iteration"
+      - "runSessionIteration: Execute processes and return unified execution prompt"
+      - "planSessionIteration: Analyze session state and determine next steps"
+      - "updateSession: Update session state with progress and blockers"
+      - "resolveSessionBlockers: Handle critical blockers and determine resolution"
+      - "clarifySession: Resolve uncertainties through user consultation"
+      
+  workflowExecutionCycle:
+    standardCycle: "runSessionIteration → updateSession → planSessionIteration → runSessionIteration"
+    blockerHandling: "runSessionIteration → [resolveSessionBlockers] → resolution → planSessionIteration"
+    cyclicalNature: "Continuous cycles until goal achievement with automatic termination"
+    flowControl:
+      normal: "Standard progression through analysis, discovery, planning, execution"
+      withBlockers: "Immediate interruption and resolution before continuation"
+      completion: "Final validation processes determine workflow termination"
+
+# === PROCESS DEFINITIONS ===
+processDefinitions:
+  purpose: "Reference examples of workflow processes and their behavioral patterns"
+  note: "These are example processes that can be customized, extended, split, or replaced based on specific project needs"
+  
+  analysisProcesses:
+    problemAnalysis:
+      businessPurpose: "Transform user request into clear problem definition with measurable success criteria"
+      keyActivities:
+        - "Extract core problem from user requirements"
+        - "Identify affected stakeholders and their needs"
+        - "Establish clear scope boundaries and limitations"
+        - "Define success criteria and acceptance conditions"
+      criticalDecisionPoints:
+        - "Problem statement clarity and measurability"
+        - "Stakeholder needs alignment and conflict resolution"
+        - "Scope boundary definition and validation"
+      blockerTriggers:
+        - "Ambiguous task formulation affecting outcome → calls resolveSessionBlockers()"
+        - "Missing measurable success criteria → calls resolveSessionBlockers()"
+        - "Unclear project scope boundaries → calls resolveSessionBlockers()"
+        - "Contradictory stakeholder requirements → calls resolveSessionBlockers()"
+      blockerHandling: "Process immediately calls resolveSessionBlockers() when any trigger condition is met, stopping execution"
+        
+    requirementsClarification:
+      businessPurpose: "Eliminate ambiguities and establish clear implementation specifications"
+      keyActivities:
+        - "Identify gaps and unclear requirements"
+        - "Analyze implementation approaches with trade-offs"
+        - "Validate assumptions against constraints"
+        - "Resolve requirement conflicts"
+      criticalDecisionPoints:
+        - "Implementation approach selection and justification"
+        - "Assumption validation and risk assessment"
+        - "Conflict resolution and priority establishment"
+      blockerTriggers:
+        - "Requirements remain ambiguous after analysis → calls resolveSessionBlockers()"
+        - "Multiple implementation approaches without clear preference → calls resolveSessionBlockers()"
+        - "Key assumptions cannot be validated → calls resolveSessionBlockers()"
+        - "Unresolvable conflicts between requirements → calls resolveSessionBlockers()"
+      blockerHandling: "Process immediately calls resolveSessionBlockers() when any trigger condition is met, stopping execution"
+        
+  discoveryProcesses:
+    technicalDiscovery:
+      businessPurpose: "Understand existing technical landscape and integration requirements"
+      keyActivities:
+        - "Systematic codebase analysis using MCP tools"
+        - "Identify relevant components and dependencies"
+        - "Map integration points and external systems"
+        - "Analyze existing patterns and decisions"
+      criticalDecisionPoints:
+        - "Relevant code identification and analysis"
+        - "Dependency mapping and impact assessment"
+        - "Integration strategy development"
+      blockerTriggers:
+        - "Cannot find relevant code after comprehensive search → calls resolveSessionBlockers()"
+        - "Architectural patterns are unclear or contradictory → calls resolveSessionBlockers()"
+        - "Critical dependencies are undefined or conflicting → calls resolveSessionBlockers()"
+        - "Integration points present unknown risks → calls resolveSessionBlockers()"
+      blockerHandling: "Process immediately calls resolveSessionBlockers() when any trigger condition is met, stopping execution"
+        
+    architecturalAnalysis:
+      businessPurpose: "Select appropriate architectural patterns and define integration strategies"
+      keyActivities:
+        - "Evaluate existing patterns and decisions"
+        - "Assess architectural approaches and alternatives"
+        - "Select patterns with clear justification"
+        - "Define component boundaries and interfaces"
+      criticalDecisionPoints:
+        - "Pattern selection and architectural approach"
+        - "Component boundary definition"
+        - "Integration strategy consistency"
+      blockerTriggers:
+        - "Existing patterns are incompatible or contradictory → calls resolveSessionBlockers()"
+        - "Multiple valid approaches without clear selection criteria → calls resolveSessionBlockers()"
+        - "Component boundaries cannot be clearly defined → calls resolveSessionBlockers()"
+        - "Integration strategies conflict with existing architecture → calls resolveSessionBlockers()"
+      blockerHandling: "Process immediately calls resolveSessionBlockers() when any trigger condition is met, stopping execution"
+        
+  planningProcesses:
+    scenarioDefinition:
+      businessPurpose: "Define comprehensive user scenarios including success, failure, and edge cases"
+      keyActivities:
+        - "Define success scenarios and workflows"
+        - "Create failure scenarios with error handling"
+        - "Identify edge cases and boundary conditions"
+        - "Establish verification procedures"
+      criticalDecisionPoints:
+        - "Scenario completeness and coverage"
+        - "Error handling strategy and user experience"
+        - "Verification procedure definition"
+      blockerTriggers:
+        - "User workflows are unclear or undefined → calls resolveSessionBlockers()"
+        - "Scenarios cannot be tested manually → calls resolveSessionBlockers()"
+        - "Critical edge cases cannot be identified → calls resolveSessionBlockers()"
+        - "Verification procedures are incomplete → calls resolveSessionBlockers()"
+      blockerHandling: "Process immediately calls resolveSessionBlockers() when any trigger condition is met, stopping execution"
+        
+    riskAssessment:
+      businessPurpose: "Evaluate technical risks and establish mitigation strategies"
+      keyActivities:
+        - "Identify breaking changes and compatibility issues"
+        - "Assess performance implications"
+        - "Evaluate complexity factors"
+        - "Document mitigation strategies"
+      criticalDecisionPoints:
+        - "Risk severity assessment and prioritization"
+        - "Mitigation strategy effectiveness"
+        - "Rollback capability planning"
+      blockerTriggers:
+        - "High-risk elements without clear mitigation strategy → calls resolveSessionBlockers()"
+        - "Complexity assessment reveals unclear dependencies → calls resolveSessionBlockers()"
+        - "Breaking changes cannot be evaluated for impact → calls resolveSessionBlockers()"
+        - "Incomplete rollback strategies → calls resolveSessionBlockers()"
+      blockerHandling: "Process immediately calls resolveSessionBlockers() when any trigger condition is met, stopping execution"
+        
+    implementationPlanning:
+      businessPurpose: "Create detailed, actionable implementation strategy with independent tasks"
+      keyActivities:
+        - "Break down implementation into testable tasks"
+        - "Define execution sequence and dependencies"
+        - "Create verification procedures"
+        - "Establish rollback safety plans"
+      criticalDecisionPoints:
+        - "Task independence and testability"
+        - "Execution sequence optimization"
+        - "Verification procedure completeness"
+      blockerTriggers:
+        - "Tasks cannot be made independent → calls resolveSessionBlockers()"
+        - "Verification procedures are unclear or incomplete → calls resolveSessionBlockers()"
+        - "Execution sequence contains unresolvable dependencies → calls resolveSessionBlockers()"
+        - "Rollback strategies don't ensure safety → calls resolveSessionBlockers()"
+      blockerHandling: "Process immediately calls resolveSessionBlockers() when any trigger condition is met, stopping execution"
+        
+  executionProcesses:
+    codeImplementation:
+      businessPurpose: "Execute systematic implementation with comprehensive impact analysis"
+      keyActivities:
+        - "Conduct systemic impact analysis"
+        - "Identify dependencies and side effects"
+        - "Implement following project patterns"
+        - "Add temporary validation"
+      criticalDecisionPoints:
+        - "Implementation approach and pattern compliance"
+        - "System impact assessment and validation"
+        - "User confirmation and acceptance"
+      blockerTriggers:
+        - "Related code analysis reveals unclear dependencies → calls resolveSessionBlockers()"
+        - "Implementation approaches conflict with each other → calls resolveSessionBlockers()"
+        - "System impacts cannot be fully assessed → calls resolveSessionBlockers()"
+        - "Project patterns are ambiguous or contradictory → calls resolveSessionBlockers()"
+      blockerHandling: "Process immediately calls resolveSessionBlockers() when any trigger condition is met, stopping execution"
+        
+    verificationTesting:
+      businessPurpose: "Conduct comprehensive verification against requirements and scenarios"
+      keyActivities:
+        - "Verify requirements and acceptance criteria"
+        - "Test all scenarios (success, failure, edge cases)"
+        - "Validate error handling and user experience"
+        - "Confirm system integration"
+      criticalDecisionPoints:
+        - "Verification completeness and accuracy"
+        - "Testing coverage and scenario validation"
+        - "Integration testing and system validation"
+      blockerTriggers:
+        - "Verification procedures cannot be executed manually → calls resolveSessionBlockers()"
+        - "Testing reveals unresolved issues → calls resolveSessionBlockers()"
+        - "Critical scenarios cannot be tested → calls resolveSessionBlockers()"
+        - "Integration tests show unexpected results → calls resolveSessionBlockers()"
+      blockerHandling: "Process immediately calls resolveSessionBlockers() when any trigger condition is met, stopping execution"
+        
+    qualityAssurance:
+      businessPurpose: "Ensure comprehensive quality compliance with project standards"
+      keyActivities:
+        - "Review code against quality standards"
+        - "Validate pattern consistency"
+        - "Ensure documentation and testing coverage"
+        - "Verify naming conventions and maintainability"
+      criticalDecisionPoints:
+        - "Quality standard compliance and validation"
+        - "Pattern consistency and maintainability"
+        - "Documentation completeness and accuracy"
+      blockerTriggers:
+        - "Quality standards are unclear or incomplete → calls resolveSessionBlockers()"
+        - "Pattern consistency cannot be determined → calls resolveSessionBlockers()"
+        - "Documentation requirements are contradictory → calls resolveSessionBlockers()"
+        - "Naming conventions don't match the project → calls resolveSessionBlockers()"
+      blockerHandling: "Process immediately calls resolveSessionBlockers() when any trigger condition is met, stopping execution"
+
+# === EXECUTION PATTERNS ===
+executionPatterns:
+  purpose: "Behavioral patterns governing workflow execution and process orchestration"
+  
+  sequentialExecution:
+    pattern: "Processes execute in logical sequence with prerequisite validation"
+    implementation: "Each process validates requirements before execution"
+    benefits:
+      - "Ensures logical progression through development stages"
+      - "Prevents execution of processes without necessary context"
+      - "Maintains workflow integrity through systematic validation"
+      
+  adaptiveSelection:
+    pattern: "Process selection adapts based on session state and workflow needs"
+    implementation: "Session analysis determines optimal process execution order"
+    benefits:
+      - "Flexible workflow execution based on actual needs"
+      - "Efficient resource utilization and time management"
+      - "Responsive adaptation to changing requirements"
+      
+  contextualValidation:
+    pattern: "Each process validates specific prerequisites and context requirements"
+    implementation: "Requirements array defines process prerequisites and dependencies"
+    benefits:
+      - "Prevents execution without necessary foundation"
+      - "Ensures quality and completeness of workflow execution"
+      - "Maintains systematic approach to development"
+      
+  blockerEscalation:
+    pattern: "Critical gaps trigger workflow interruption for external resolution"
+    implementation: "Action triggers detect situations requiring user intervention"
+    benefits:
+      - "Prevents wasted effort on incomplete requirements"
+      - "Ensures timely escalation of blocking issues"
+      - "Maintains workflow quality through systematic problem detection"
+
+# === BLOCKER MANAGEMENT ===
+blockerManagement:
+  purpose: "Critical blocker detection, classification, and resolution system integrated into workflow"
+  
+  blockerClassification:
+    userDecisionRequired:
+      description: "Blockers requiring business decisions from user"
+      sessionLocation: "blockers.needToUserApprove"
+      examples:
+        - "Business decision required with clear impact description"
+        - "Scope change needed with approval requirements"
+        - "Architecture decision with business impact requiring approval"
+      resolutionApproach: "User consultation and explicit decision through resolveSessionBlockers"
+      
+    clarifyResolvable:
+      description: "Blockers that can be resolved through analysis or clarification"
+      sessionLocation: "blockers.needToClarify"
+      examples:
+        - "Technical question with clear context about why needed"
+        - "Implementation approach with alternative options"
+        - "Non-critical requirement ambiguities with resolution paths"
+      resolutionApproach: "Automated analysis via clarifySession process"
+      
+  workflowIntegration:
+    detectionResponsibility: "Individual processes detect blockers during execution"
+    immediateEscalation: "Process calls resolveSessionBlockers() immediately when blockers encountered"
+    executionInterruption: "resolveSessionBlockers immediately stops process execution when called"
+    sessionStructure: "Blockers organized in logical session structure with top-level classification"
+    priorityPrinciple: "Blocker resolution takes precedence over process completion"
+    
+  detectionAlgorithm:
+    inProcessDetection: "Each process identifies blockers during task execution"
+    immediateEscalation: "Process calls resolveSessionBlockers() when blockers encountered"
+    blockerClassification: "resolveSessionBlockers categorizes as USER_DECISION_REQUIRED or CLARIFY_RESOLVABLE"
+    sessionIntegration: "resolveSessionBlockers updates session with structured blocker information"
+    resolutionStrategy: "resolveSessionBlockers determines appropriate resolution path"
+    
+  resolutionWorkflow:
+    userDecisionBlockers: "resolveSessionBlockers handles user consultation with structured questions"
+    clarifyBlockers: "resolveSessionBlockers triggers clarifySession for automated resolution"
+    mixedBlockers: "resolveSessionBlockers handles both user consultation and clarification as needed"
+    workflowContinuation: "planSessionIteration called after blocker resolution to continue workflow"
+    
+# === REQUIREMENTS SYSTEM ===
+requirementsSystem:
+  purpose: "Process selection guidance system providing intelligent hints for LLM workflow decisions"
+  
+  conceptualFramework:
+    description: "Requirements provide contextual hints for when processes are most effectively applied"
+    principle: "LLM analyzes session content and uses requirements as decision-making guidance, not automatic filters"
+    intelligence: "System relies on LLM's analytical capabilities rather than rigid rule-based automation"
+    flexibility: "No automatic filtering - LLM can override requirements based on session analysis"
+    
+  implementationMechanism:
+    definitionLocation: "Requirements defined in config.yaml processes as optional requirements array"
+    displayMechanism: "planSessionIteration shows requirements as 'Recommended when:' hints for each process"
+    decisionMaking: "LLM evaluates session content against requirement hints for intelligent process selection"
+    workflowIntegration: "Process selection reevaluated each cycle based on updated session content"
+    
+  requirementTypes:
+    sessionAnalysis: "Questions about session content completeness and structure"
+    dependencies: "Logical prerequisites and workflow ordering guidance"
+    contextual: "Situational factors that influence process effectiveness"
+    
+  guidanceExamples:
+    analysis: "Problem clearly defined in session?"
+    technical: "Technical context and requirements are complete?"
+    planning: "Implementation plan exists in session?"
+    implementation: "No critical blockers present in session?"
+    validation: "Implementation completed and needs verification?"
+    
+  workflowBenefits:
+    contextualGuidance: "Provides clear guidance for when each process is most valuable"
+    intelligentSelection: "Enables LLM to make informed decisions about workflow progression"
+    adaptability: "Maintains system flexibility while providing structured guidance"
+    transparency: "Makes process selection logic visible and understandable"
+
+# === QUALITY FRAMEWORK ===
+qualityFramework:
+  purpose: "Comprehensive quality assurance throughout workflow development and execution"
+  
+  processQuality:
+    completeness: "All processes include comprehensive task coverage and validation"
+    consistency: "Process structure and behavior patterns remain consistent"
+    effectiveness: "Processes achieve intended outcomes with measurable results"
+    
+  workflowQuality:
+    sequentialLogic: "Workflow stages follow logical progression with clear dependencies"
+    contextualAdequacy: "Workflow adapts appropriately to different domain requirements"
+    blockerHandling: "Critical gaps detected and escalated systematically"
+    
+  outcomeQuality:
+    requirementCompliance: "Final implementation meets all validated requirements"
+    architecturalConsistency: "Solution aligns with established architectural patterns"
+    userExperience: "Solution provides expected user experience and functionality"
+    
+  continuousImprovement:
+    feedbackIntegration: "Workflow outcomes inform process refinement and improvement"
+    patternEvolution: "Successful patterns incorporated into workflow methodology"
+    adaptationCapability: "Workflow methodology evolves based on domain-specific needs"
+    
+  validationCriteria:
+    processExecution: "Each process executes according to defined behavioral patterns"
+    blockerDetection: "Critical gaps detected and escalated appropriately"
+    qualityStandards: "Final outcomes meet established quality and compliance standards"
+    userAcceptance: "Solution meets user needs and expectations as defined in requirements"
+
+# === PROCESS FLEXIBILITY ===
+processFlexibility:
+  purpose: "Framework for creating, modifying, and composing processes according to specific needs"
+  
+  processCreation:
+    customProcesses: "Create entirely new processes for domain-specific requirements"
+    specializationNeeds: "Develop processes targeting specific technical or business domains"
+    innovativeApproaches: "Implement new methodologies and experimental approaches"
+    
+    creationGuidelines:
+      - "Define clear purpose and scope for the new process"
+      - "Identify unique value proposition compared to existing processes"
+      - "Establish prerequisite requirements and dependencies"
+      - "Include appropriate blocker detection and escalation triggers"
+      - "Define structured response format and length constraints"
+      
+    examples:
+      apiDesignProcess: "Specialized process for API design and documentation"
+      dataModelingProcess: "Process focused on database schema and data relationships"
+      userExperienceProcess: "Process for UX research and interface design"
+      performanceOptimizationProcess: "Process for system performance analysis and optimization"
+      
+  processDecomposition:
+    principle: "Large or complex processes can be split into smaller, focused components"
+    benefits:
+      - "Improved modularity and reusability"
+      - "Better parallel execution possibilities"
+      - "Enhanced maintainability and clarity"
+      - "Flexible composition for different scenarios"
+      
+    decompositionStrategies:
+      functionalSplit: "Split by distinct functional responsibilities"
+      phasedApproach: "Divide into sequential phases with clear handoffs"
+      domainSegmentation: "Separate by technical or business domain expertise"
+      complexityLevels: "Split by complexity or risk levels"
+      
+    examples:
+      technicalDiscoveryDecomposition:
+        - "codebaseAnalysis: Focus on existing code structure and patterns"
+        - "dependencyMapping: Analyze dependencies and integration points"
+        - "architectureEvaluation: Assess architectural patterns and decisions"
+        
+      implementationPlanningDecomposition:
+        - "taskBreakdown: Decompose work into independent tasks"
+        - "sequenceOptimization: Define optimal execution order"
+        - "riskMitigation: Plan rollback and safety measures"
+        
+  processComposition:
+    principle: "Combine multiple processes to create comprehensive workflows"
+    approaches:
+      sequentialComposition: "Chain processes with clear dependencies"
+      parallelComposition: "Execute compatible processes simultaneously"
+      conditionalComposition: "Select processes based on session state and requirements"
+      iterativeComposition: "Repeat process groups until completion criteria met"
+      
+    compositionPatterns:
+      analysisCluster: "Group related analysis processes for comprehensive understanding"
+      implementationPipeline: "Chain implementation processes for systematic delivery"
+      validationSuite: "Combine validation processes for thorough quality assurance"
+      
+  adaptiveProcessSelection:
+    principle: "Process execution adapts dynamically based on project characteristics"
+    selectionCriteria:
+      - "Project complexity and size"
+      - "Domain-specific requirements"
+      - "Available resources and constraints"
+      - "Risk tolerance and quality standards"
+      
+    adaptationMechanisms:
+      contextualAnalysis: "Analyze project context to determine optimal process set"
+      requirementMapping: "Map requirements to appropriate process capabilities"
+      dynamicSequencing: "Adjust process execution order based on dependencies"
+      
+# === PROCESS EXTENSION PATTERNS ===
+processExtensionPatterns:
+  purpose: "Common patterns for extending and customizing workflow processes"
+  
+  domainSpecificExtensions:
+    frontendDevelopment:
+      - "componentDesign: Design reusable UI components"
+      - "accessibilityValidation: Ensure accessibility compliance"
+      - "crossBrowserTesting: Validate across different browsers"
+      
+    backendDevelopment:
+      - "apiSpecification: Define API contracts and documentation"
+      - "dataConsistency: Ensure data integrity and consistency"
+      - "scalabilityPlanning: Plan for performance and scalability"
+      
+    dataEngineering:
+      - "dataValidation: Validate data quality and integrity"
+      - "pipelineDesign: Design data processing pipelines"
+      - "monitoringSetup: Establish data monitoring and alerting"
+      
+    devopsIntegration:
+      - "infrastructureDesign: Design deployment and infrastructure"
+      - "cicdSetup: Establish continuous integration and deployment"
+      - "monitoringImplementation: Implement system monitoring and logging"
+      
+  crossCuttingConcerns:
+    securityIntegration:
+      - "securityAnalysis: Analyze security requirements and vulnerabilities"
+      - "authenticationDesign: Design authentication and authorization"
+      - "dataProtection: Implement data protection and privacy measures"
+      
+    performanceOptimization:
+      - "performanceAnalysis: Analyze performance bottlenecks and requirements"
+      - "optimizationPlanning: Plan performance optimization strategies"
+      - "loadTesting: Design and execute load testing procedures"
+      
+    complianceValidation:
+      - "regulatoryAnalysis: Analyze regulatory and compliance requirements"
+      - "complianceValidation: Validate against compliance standards"
+      - "documentationGeneration: Generate compliance documentation"
+
+# === CUSTOMIZATION GUIDELINES ===
+customizationGuidelines:
+  purpose: "Framework for adapting workflow methodology to specific domain requirements"
+  
+  adaptationPoints:
+    processCustomization: "Individual processes can be customized for domain-specific needs"
+    processCreation: "New processes can be created to address unique requirements"
+    processDecomposition: "Existing processes can be split into smaller, focused components"
+    sequenceModification: "Process execution sequence can be adapted based on domain requirements"
+    qualityStandards: "Quality criteria can be customized for specific project standards"
+    
+  consistencyMaintenance:
+    coreStructure: "Core workflow structure and principles remain consistent"
+    blockerHandling: "Critical gap detection and escalation patterns maintained"
+    qualityFramework: "Quality assurance framework adapted but not eliminated"
+    processStandards: "New and modified processes follow established structural patterns"
+    
+  domainSpecialization:
+    technicalDomains: "Workflow adapted for specific technical domains and constraints"
+    businessDomains: "Process customization for specific business requirements"
+    scalabilityRequirements: "Workflow scaling for different project sizes and complexity"
+    innovationSupport: "Support for experimental and innovative development approaches"
+    
+  validationRequirements:
+    customizationTesting: "Customized workflows validated against intended outcomes"
+    standardCompliance: "Adaptations maintain compliance with core methodology principles"
+    effectivenessVerification: "Customized workflows demonstrate effectiveness in target domain"
+    processIntegration: "New processes integrate seamlessly with existing workflow infrastructure"
+    
+# === MCP-BASED WORKFLOW UNIQUENESS ===
+mcpWorkflowUniqueness:
+  purpose: "Critical distinctions between MCP-based workflows and traditional development workflows"
+  
+  fullAutomationRealization:
+    traditionalApproach: "Manual workflow orchestration with human decision-making at each stage"
+    mcpApproach: "Complete automation through MCP tools with LLM-driven decision making"
+    keyDifference: "Single user request triggers entire workflow execution without manual intervention"
+    
+  intelligentOrchestration:
+    traditionalApproach: "Fixed workflow sequences with manual process selection"
+    mcpApproach: "Dynamic process selection based on session state analysis and requirement hints"
+    keyDifference: "LLM analyzes session content and intelligently selects appropriate processes"
+    
+  blockerIntegration:
+    traditionalApproach: "Manual blocker identification and ad-hoc resolution procedures"
+    mcpApproach: "Automatic blocker detection by processes with immediate workflow interruption"
+    keyDifference: "resolveSessionBlockers() provides systematic blocker classification and resolution"
+    
+  cyclicalExecution:
+    traditionalApproach: "Linear workflow progression with manual iteration decisions"
+    mcpApproach: "Continuous cyclical execution until goal achievement with automatic termination"
+    keyDifference: "Workflow continues autonomously through runSessionIteration → planSessionIteration cycles"
+    
+  sessionBasedContext:
+    traditionalApproach: "Manual context management and decision tracking"
+    mcpApproach: "Persistent session files with structured context preservation and intelligent updates"
+    keyDifference: "updateSession provides systematic context management with information classification"
+    
+  toolIntegration:
+    traditionalApproach: "Manual tool coordination and result interpretation"
+    mcpApproach: "Seamless MCP tool integration with prompt-returning and data-returning tool types"
+    keyDifference: "Tools provide algorithmic prompts for LLM execution or structured data for processing"
+    
+  requirementsGuidance:
+    traditionalApproach: "Fixed process sequences with manual requirement validation"
+    mcpApproach: "Intelligent process selection using requirements as decision-making hints"
+    keyDifference: "LLM evaluates session content against process requirements for optimal selection"
+    
+  goalOrientedTermination:
+    traditionalApproach: "Manual workflow completion assessment and sign-off procedures"
+    mcpApproach: "Automatic goal achievement detection through session analysis and final validation"
+    keyDifference: "planSessionIteration determines when goal is achieved and triggers appropriate termination"
+    
+  implementationImplications:
+    configurationFocus: "Workflow behavior defined through config.yaml and core.yaml rather than code"
+    mcpToolRequirements: "All workflow orchestration depends on proper MCP tool implementation"
+    sessionFileStructure: "Logical session organization critical for intelligent workflow decisions"
+    blockerResolution: "Workflow integrity depends on proper blocker detection and resolution mechanisms"
+    
+  practicalBenefits:
+    developerExperience: "Single request triggers complete feature development without manual orchestration"
+    qualityAssurance: "Systematic blocker detection prevents implementation of incomplete features"
+    contextPreservation: "Persistent session state enables intelligent workflow decisions across cycles"
+    adaptability: "Flexible process selection adapts to project-specific requirements and constraints"
+    
+# === PROCESS CREATION FRAMEWORK ===
+processCreationFramework:
+  purpose: "Systematic approach to creating new processes within workflow methodology"
+  
+  processDesignPrinciples:
+    singlePurpose: "Each process should have a clear, focused purpose"
+    autonomousOperation: "Process should operate independently within defined scope"
+    blockerDetection: "Include appropriate triggers for critical gap detection"
+    contextualAdaptation: "Process should adapt to different project contexts"
+    
+  structuralRequirements:
+    purposeStatement: "Clear statement of process purpose and value proposition"
+    roleDefinition: "Specific role and expertise required for process execution"
+    taskBreakdown: "Detailed breakdown of tasks and responsibilities"
+    actionTriggers: "Specific triggers for workflow interruption and escalation"
+    responseFormat: "Structured response format and length constraints"
+    
+  integrationConsiderations:
+    prerequisiteMapping: "Clear definition of prerequisites and dependencies"
+    outputSpecification: "Specification of process outputs and deliverables"
+    sequenceCompatibility: "Compatibility with existing process execution sequences"
+    sessionIntegration: "Integration with session-based workflow orchestration"
+    
+  validationCriteria:
+    purposeClarity: "Process purpose is clear and addresses specific need"
+    executionFeasibility: "Process can be executed effectively within workflow"
+    outputUtility: "Process outputs provide value to subsequent workflow stages"
+    qualityStandards: "Process meets established quality and consistency standards"
+    
+# === CONFIGURATION GENERATION TEMPLATE ===
+configurationTemplate:
+  purpose: "Complete template and guidelines for generating proper config.yaml structure"
+  
+  fileStructure:
+    format: "YAML file with config root wrapper"
+    requiredSections: ["config", "config.processes"]
+    encoding: "UTF-8"
+    extension: ".yaml"
+    
+  configTemplate:
+    baseStructure: |
+      config:
+        processes:
+          processName:
+            purpose: "Single sentence describing process goal"
+            requirements: # Optional - array of hints for planSessionIteration
+              - "Session state condition for process recommendation"
+              - "Prerequisite completion status question"
+            prompt:
+              role: "Specific role and expertise required for process execution"
+              text: "Detailed description of process tasks, context, and execution guidelines (recommended max 100 lines)"
+              actions:
+                - trigger: "Critical gap condition that prevents workflow continuation?"
+                  action: "Stop execution and escalate for resolution"
+                - trigger: "Another blocking condition requiring intervention?"
+                  action: "Interrupt workflow and request clarification"
+              respond: "Structured response format requirements and length constraints"
+              
+  processDefinitionStandards:
+    requiredFields:
+      purpose:
+        description: "Single sentence describing what this process achieves"
+        format: "Clear, actionable statement of process goal"
+        examples:
+          - "Analyze and define the core problem with clear success criteria"
+          - "Execute systematic implementation with comprehensive impact analysis"
+          - "Conduct comprehensive verification against requirements and scenarios"
+          
+      prompt:
+        description: "Structured execution instructions for LLM"
+        requiredSubfields: ["role", "text", "actions", "respond"]
+        optionalSubfields: []
+        
+      role:
+        description: "Specific role and expertise required for process execution"
+        format: "Professional role with clear expertise area"
+        examples:
+          - "You are a business analyst specializing in problem definition and requirement scoping"
+          - "You are a senior software engineer executing code implementation with systematic analysis"
+          - "You are a quality assurance specialist conducting comprehensive verification testing"
+          
+      text:
+        description: "Detailed description of process tasks, context, and execution guidelines"
+        format: "Free-form text containing all process execution instructions"
+        guidelines:
+          - "Should be comprehensive yet concise (recommended max 100 lines)"
+          - "Include specific tasks, context, and operational guidelines"
+          - "Should build logically toward process goal"
+          - "Include tool usage guidance when applicable"
+        examples:
+          - "Analyze the user request and identify core problem. Define clear problem statement with measurable success criteria. Consider stakeholder needs and scope boundaries."
+          - "Conduct systematic codebase search using available tools. Map existing patterns and architectural decisions. Analyze integration points and dependencies."
+          - "Execute all specified processes using their prompts provided by MCP. Coordinate process execution and manage workflow state."
+          
+      actions:
+        description: "Critical gap detection triggers and escalation actions"
+        format: "Array of trigger-action pairs"
+        structure:
+          trigger: "Specific condition that indicates critical gap"
+          action: "Escalation action to take when trigger occurs"
+        standardActions:
+          - "Stop execution and escalate for resolution"
+          - "Interrupt workflow and request clarification"
+          - "Halt progress until dependencies are resolved"
+        triggerGuidelines:
+          - "Should be specific and clearly detectable"
+          - "Must indicate situations where workflow cannot continue"
+          - "Should end with question mark to indicate decision point"
+          
+      respond:
+        description: "Output format requirements and constraints"
+        format: "Structured response requirements"
+        standardFormat: "Structured response no more than 50 lines"
+        alternatives:
+          - "Detailed analysis with bullet points, maximum 100 lines"
+          - "Comprehensive report with sections, no more than 75 lines"
+          - "Summary format with key findings, maximum 25 lines"
+          
+    optionalFields:
+      requirements:
+        description: "Process selection hints for planSessionIteration"
+        format: "Array of questions about session state"
+        purpose: "Guidance for intelligent process selection by LLM"
+        examples:
+          - "Problem clearly defined in session?"
+          - "Technical context and requirements are complete?"
+          - "Implementation plan exists in session?"
+          - "No critical blockers present in session?"
+          
+
+          
+  processNamingConventions:
+    format: "camelCase"
+    guidelines:
+      - "Use descriptive names that clearly indicate process purpose"
+      - "Avoid abbreviations unless universally understood"
+      - "Include action or outcome in name when possible"
+    examples:
+      good: ["problemAnalysis", "technicalDiscovery", "implementationPlanning", "codeImplementation"]
+      avoid: ["proc1", "techDisc", "implPlan", "codeImpl"]
+      
+  blockerIntegrationPatterns:
+    purpose: "Standard patterns for integrating blocker detection into processes"
+    
+    triggerPatterns:
+      ambiguityPattern: "Requirements/specifications remain unclear after analysis?"
+      conflictPattern: "Multiple approaches exist without clear selection criteria?"
+      dependencyPattern: "Critical dependencies are undefined or conflicting?"
+      complexityPattern: "High-risk elements exist without clear mitigation strategy?"
+      
+    actionPatterns:
+      escalationAction: "Stop execution and escalate for resolution"
+      clarificationAction: "Interrupt workflow and request clarification"
+      dependencyAction: "Halt progress until dependencies are resolved"
+      
+    integrationExamples:
+      analysis: |
+        actions:
+          - trigger: "Are there ambiguities in task formulation that could affect the outcome?"
+            action: "Stop execution and escalate for resolution"
+          - trigger: "Are measurable success criteria missing?"
+            action: "Stop execution and escalate for resolution"
+            
+      technical: |
+        actions:
+          - trigger: "Cannot find relevant code after comprehensive search?"
+            action: "Stop execution and escalate for resolution"
+          - trigger: "Critical dependencies are undefined or conflicting?"
+            action: "Stop execution and escalate for resolution"
+            
+      implementation: |
+        actions:
+          - trigger: "Related code analysis reveals unclear dependencies?"
+            action: "Stop execution and escalate for resolution"
+          - trigger: "System impacts cannot be fully assessed?"
+            action: "Stop execution and escalate for resolution"
+            
+  workflowStageTemplates:
+    analysisStage:
+      processTypes: ["Problem analysis", "Requirements clarification", "Stakeholder mapping"]
+      commonRequirements:
+        - "Project request clearly defined?"
+        - "Initial context available for analysis?"
+      commonActions:
+        - "Ambiguous requirements that could affect outcome?"
+        - "Contradictory stakeholder needs that cannot be resolved?"
+        
+    discoveryStage:
+      processTypes: ["Technical discovery", "Architectural analysis", "Dependency mapping"]
+      commonRequirements:
+        - "Problem clearly defined in session?"
+        - "Scope boundaries established?"
+      commonActions:
+        - "Relevant code cannot be found after comprehensive search?"
+        - "Architectural patterns are unclear or contradictory?"
+        
+    planningStage:
+      processTypes: ["Scenario definition", "Risk assessment", "Implementation planning"]
+      commonRequirements:
+        - "Technical context and requirements are complete?"
+        - "Architecture patterns identified?"
+      commonActions:
+        - "Planning cannot proceed without missing information?"
+        - "Risk mitigation strategies are incomplete?"
+        
+    executionStage:
+      processTypes: ["Code implementation", "Verification testing", "Quality assurance"]
+      commonRequirements:
+        - "Implementation plan exists in session?"
+        - "No critical blockers present in session?"
+      commonActions:
+        - "Implementation reveals unresolved dependencies?"
+        - "Quality standards cannot be determined or applied?"
+        
+  domainSpecificExtensions:
+    frontendDevelopment:
+      additionalProcesses: ["componentDesign", "accessibilityValidation", "crossBrowserTesting"]
+      specialRequirements:
+        - "UI/UX requirements clearly defined?"
+        - "Design system patterns established?"
+      domainActions:
+        - "User interface requirements are incomplete or contradictory?"
+        - "Design system integration cannot be determined?"
+        
+    backendDevelopment:
+      additionalProcesses: ["apiSpecification", "dataConsistency", "scalabilityPlanning"]
+      specialRequirements:
+        - "API contracts and data models defined?"
+        - "Performance requirements established?"
+      domainActions:
+        - "API design conflicts with existing system architecture?"
+        - "Data consistency requirements cannot be satisfied?"
+        
+    dataEngineering:
+      additionalProcesses: ["dataValidation", "pipelineDesign", "monitoringSetup"]
+      specialRequirements:
+        - "Data sources and formats clearly defined?"
+        - "Processing requirements established?"
+      domainActions:
+        - "Data quality standards cannot be determined?"
+        - "Pipeline architecture conflicts with existing systems?"
+        
+  validationChecklist:
+    structuralValidation:
+      - "Config wrapper present at root level?"
+      - "All processes under config.processes section?"
+      - "Required fields present for each process?"
+      - "YAML syntax valid and properly formatted?"
+      
+    processValidation:
+      - "Process names follow camelCase convention?"
+      - "Purpose statements are clear and single sentence?"
+      - "Role definitions specify required expertise?"
+      - "Tasks are specific and actionable?"
+      - "Actions include proper trigger-action pairs?"
+      - "Response format requirements specified?"
+      
+    blockerIntegration:
+      - "Each process includes appropriate blocker detection?"
+      - "Trigger conditions are specific and detectable?"
+      - "Actions follow standard escalation patterns?"
+      - "Critical gaps properly identified for each process?"
+      
+    workflowIntegration:
+      - "Requirements provide useful hints for process selection?"
+      - "Processes integrate properly with MCP tool orchestration?"
+      - "Session-based workflow patterns supported?"
+             - "Cyclical execution compatibility maintained?"
+       
+  completeProcessExample:
+    purpose: "Complete example of properly structured process following all standards"
+    
+    exampleProcess: |
+      apiDesignProcess:
+        purpose: "Design comprehensive API specification with contracts, documentation, and integration patterns"
+        requirements:
+          - "Technical context and requirements are complete?"
+          - "Architecture patterns identified?"
+          - "No critical blockers present in session?"
+        prompt:
+          role: "You are a senior API architect specializing in RESTful design patterns and system integration"
+          text: |
+            ## Core Tasks
+            
+            1. **Analyze existing API patterns** - Review codebase for design consistency requirements
+            2. **Design API endpoints** - Create proper HTTP methods and resource modeling following RESTful principles
+            3. **Create API contracts** - Develop comprehensive request/response schemas with proper validation
+            4. **Design error handling** - Establish status code conventions consistent with existing system
+            5. **Document API specification** - Create usage examples and integration guidelines for developers
+            6. **Validate design** - Ensure compatibility with existing system architecture and constraints
+            
+            ## Technical Requirements
+            
+            - Use **OpenAPI 3.0** specification format
+            - Follow **RESTful design principles**
+            - Ensure **backward compatibility**
+            - Consider **performance implications** and scalability requirements
+            - Include proper **authentication and authorization** patterns
+            
+            ## Quality Standards
+            
+            - Maintain consistency with existing system patterns
+            - Provide clear documentation and examples
+            - Consider security and performance implications
+          actions:
+            - trigger: "API design conflicts with existing system architecture?"
+              action: "Stop execution and escalate for resolution"
+            - trigger: "Multiple valid design approaches exist without clear selection criteria?"
+              action: "Stop execution and escalate for resolution"
+            - trigger: "Critical integration requirements are undefined or conflicting?"
+              action: "Stop execution and escalate for resolution"
+            - trigger: "Backward compatibility cannot be maintained with proposed design?"
+              action: "Stop execution and escalate for resolution"
+          respond: "Structured API specification with documentation, no more than 75 lines"
+          
+    annotatedExplanation:
+      processName:
+        value: "apiDesignProcess"
+        explanation: "CamelCase naming with clear indication of process purpose (API design)"
+        
+      purpose:
+        value: "Design comprehensive API specification with contracts, documentation, and integration patterns"
+        explanation: "Single sentence describing specific goal and deliverable"
+        
+      requirements:
+        explanation: "Optional hints for planSessionIteration to determine when this process is recommended"
+        usage: "LLM analyzes session content against these questions to determine process applicability"
+        flexibility: "LLM can override these requirements based on session analysis"
+        
+      role:
+        value: "You are a senior API architect specializing in RESTful design patterns and system integration"
+        explanation: "Specific professional role with clear expertise domain"
+        
+      text:
+        explanation: "Comprehensive process description combining tasks, context, and execution guidelines"
+        characteristics:
+          - "Free-form text providing complete process instructions"
+          - "Includes specific tasks, operational guidelines, and context"
+          - "Follows logical sequence from analysis to documentation"
+          - "Contains tool usage guidance and quality constraints"
+          - "Recommended to keep under 100 lines for readability"
+        
+      actions:
+        explanation: "Critical gap detection triggers with standard escalation actions"
+        patterns:
+          - "Architectural conflicts → escalation"
+          - "Selection criteria ambiguity → escalation"  
+          - "Dependency conflicts → escalation"
+          - "Compatibility issues → escalation"
+          
+      respond:
+        value: "Structured API specification with documentation, no more than 75 lines"
+        explanation: "Clear output format requirements with length constraints"
+        
+  generationGuidelines:
+    purpose: "Step-by-step process for generating proper config.yaml"
+    
+    step1_identifyDomain:
+      description: "Identify target domain and workflow requirements"
+      actions:
+        - "Analyze project domain (frontend, backend, data, DevOps, etc.)"
+        - "Identify specific workflow challenges and needs"
+        - "Determine required workflow stages and process types"
+        
+    step2_selectStages:
+      description: "Choose appropriate workflow stages for domain"
+      standardStages: ["analysis", "discovery", "planning", "execution"]
+      customizationOptions:
+        - "Add domain-specific stages (e.g., design, deployment, monitoring)"
+        - "Split complex stages into focused sub-processes"
+        - "Remove unnecessary stages for simplified workflows"
+        
+    step3_defineProcesses:
+      description: "Create processes for each stage following template structure"
+      processCreationSequence:
+        - "Start with purpose statement defining clear goal"
+        - "Define professional role with appropriate expertise"
+        - "List specific, actionable tasks building toward goal"
+        - "Add info section for constraints and guidelines"
+        - "Include blocker detection actions for critical gaps"
+        - "Specify response format and length requirements"
+        - "Add requirements array for process selection hints"
+        
+    step4_integrateBlockers:
+      description: "Ensure proper blocker detection and workflow integration"
+      blockerIntegrationSteps:
+        - "Identify potential critical gaps for each process"
+        - "Create specific trigger conditions for each gap type"
+        - "Use standard escalation actions for consistency"
+        - "Ensure triggers end with question marks for clarity"
+        
+    step5_validateStructure:
+      description: "Verify config.yaml structure and compliance"
+      validationSteps:
+        - "Check YAML syntax and structure validity"
+        - "Verify config wrapper and processes section"
+        - "Validate all required fields for each process"
+        - "Test process naming conventions and consistency"
+        - "Confirm blocker integration and action patterns"
+        
+    step6_testIntegration:
+      description: "Validate workflow integration and MCP tool compatibility"
+      testingSteps:
+        - "Verify requirements provide useful selection hints"
+        - "Check process compatibility with MCP tool orchestration"
+        - "Validate cyclical execution support"
+        - "Test session-based workflow patterns" 

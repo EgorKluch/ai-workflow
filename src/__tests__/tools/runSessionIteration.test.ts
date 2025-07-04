@@ -29,10 +29,7 @@ describe('runSessionIteration', () => {
       expect(result.prompt).toContain('MANDATORY COMPLETION SEQUENCE:');
       expect(result.prompt).toContain('Call updateSession()');
       expect(result.prompt).toContain('call planSessionIteration()');
-
-      expect(result.processes).toHaveProperty('problemAnalysis');
-      expect(result.processes.problemAnalysis).toHaveProperty('purpose');
-      expect(result.processes.problemAnalysis).toHaveProperty('prompt');
+      expect(result.prompt).toContain('PROGRESS UPDATE: After completing this process, call updateSession() to save progress.');
     });
 
     it('should execute multiple processes in sequence', async () => {
@@ -49,38 +46,7 @@ describe('runSessionIteration', () => {
       expect(result.prompt).toContain('=== END PROCESS: technicalDiscovery ===');
       expect(result.prompt).toContain('=== PROCESS: codeImplementation ===');
       expect(result.prompt).toContain('=== END PROCESS: codeImplementation ===');
-
-      expect(Object.keys(result.processes)).toHaveLength(3);
-      expect(result.processes.problemAnalysis).toBeDefined();
-      expect(result.processes.technicalDiscovery).toBeDefined();
-      expect(result.processes.codeImplementation).toBeDefined();
-    });
-
-    it('should include context guidance when context provided', async () => {
-      const args = {
-        project: '/test/project',
-        processes: ['problemAnalysis'],
-        context: 'Focus on user authentication issues'
-      };
-
-      const result = await runSessionIteration(session, args);
-
-      expect(result.prompt).toContain('CONTEXT GUIDANCE:');
-      expect(result.prompt).toContain('Focus on user authentication issues');
-      expect(result.prompt).toContain('Apply this context to refine your process execution');
-      expect(result.context).toBe('Focus on user authentication issues');
-    });
-
-    it('should not include context guidance when context not provided', async () => {
-      const args = {
-        project: '/test/project',
-        processes: ['problemAnalysis']
-      };
-
-      const result = await runSessionIteration(session, args);
-
-      expect(result.prompt).not.toContain('CONTEXT GUIDANCE:');
-      expect(result.context).toBeUndefined();
+      expect(result.prompt).toContain('PROGRESS UPDATE: After completing this process, call updateSession() to save progress.');
     });
 
     it('should maintain process order in prompt', async () => {
@@ -109,7 +75,7 @@ describe('runSessionIteration', () => {
 
       const result = await runSessionIteration(session, args);
 
-      expect(result).toEqual({ prompt: '', processes: {} });
+      expect(result).toEqual({ prompt: '' });
       expect(session.logger.addError).toHaveBeenCalledWith({
         code: RunSessionIterationErrorCode.INVALID_REQUEST,
         message: 'Project parameter is required',
@@ -125,7 +91,7 @@ describe('runSessionIteration', () => {
 
       const result = await runSessionIteration(session, args);
 
-      expect(result).toEqual({ prompt: '', processes: {} });
+      expect(result).toEqual({ prompt: '' });
       expect(session.logger.addError).toHaveBeenCalledWith({
         code: RunSessionIterationErrorCode.INVALID_REQUEST,
         message: 'Processes parameter is required and must be a non-empty array',
@@ -141,7 +107,7 @@ describe('runSessionIteration', () => {
 
       const result = await runSessionIteration(session, args);
 
-      expect(result).toEqual({ prompt: '', processes: {} });
+      expect(result).toEqual({ prompt: '' });
       expect(session.logger.addError).toHaveBeenCalledWith({
         code: RunSessionIterationErrorCode.INVALID_REQUEST,
         message: 'Processes parameter is required and must be a non-empty array',
@@ -157,7 +123,7 @@ describe('runSessionIteration', () => {
 
       const result = await runSessionIteration(session, args);
 
-      expect(result).toEqual({ prompt: '', processes: {} });
+      expect(result).toEqual({ prompt: '' });
       expect(session.logger.addError).toHaveBeenCalledWith({
         code: RunSessionIterationErrorCode.INVALID_REQUEST,
         message: 'Processes parameter is required and must be a non-empty array',

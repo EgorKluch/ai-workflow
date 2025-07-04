@@ -5,11 +5,11 @@ Demonstration of a complete Session Manager workflow cycle from user request to 
 ## Workflow Architecture
 
 **Main cycle:**
-User Request → createSession → planSessionIteration → runSessionIteration → updateSession → planSessionIteration → ... → qualityAssurance → Complete
+User Request → createSession → planSessionIteration → runSessionIteration → updateSession → planSessionIteration → ... → validation → Complete
 
 **Key components:**
 - **MCP Tools**: createSession, planSessionIteration, runSessionIteration, updateSession, clarifySession
-- **Processes**: problemAnalysis, technicalDiscovery, codeImplementation, qualityAssurance
+- **Processes**: analysis, discovery, implementation, validation
 - **Blocker System**: Integrated blocker detection in planSessionIteration with logical session structure
 - **Adaptive Control**: User involvement level depends on complexity
 
@@ -37,7 +37,7 @@ mcp_sessionManager_createSession({
 ```javascript
 {
   "success": true,
-  "prompt": "Strategic planning...\n- Goal: Fix login button hover styling\n- Context: Sufficient\n- Blockers: None\n- Action: execute runSessionIteration({processes: ['codeImplementation']})"
+  "prompt": "Strategic planning...\n- Goal: Fix login button hover styling\n- Context: Sufficient\n- Blockers: None\n- Action: execute appropriate implementation processes"
 }
 ```
 
@@ -45,7 +45,7 @@ mcp_sessionManager_createSession({
 ```javascript
 mcp_sessionManager_runSessionIteration({
   project: "/Users/user/projects/myapp", 
-  processes: ["codeImplementation"]
+  processes: ["implementation"]
 })
 ```
 
@@ -61,7 +61,7 @@ Current code analysis → Problem discovery → Fix:
 ```
 
 **Automatic cycle completion:**
-updateSession → planSessionIteration → qualityAssurance
+updateSession → planSessionIteration → validation
 
 **Result:**
 ✅ Task Complete - button fixed, QA passed
@@ -89,7 +89,7 @@ mcp_sessionManager_createSession({
 **MCP Response:**
 ```javascript
 {
-  "prompt": "- Goal: Implement notification system\n- Context: High-level, needs analysis\n- Action: execute runSessionIteration({processes: ['problemAnalysis', 'technicalDiscovery', 'requirementsClarification']})"
+  "prompt": "- Goal: Implement notification system\n- Context: High-level, needs analysis\n- Action: execute appropriate analysis processes"
 }
 ```
 
@@ -97,18 +97,18 @@ mcp_sessionManager_createSession({
 ```javascript
 mcp_sessionManager_runSessionIteration({
   project: "/Users/user/projects/myapp",
-  processes: ["problemAnalysis", "technicalDiscovery", "requirementsClarification"]
+  processes: ["analysis", "discovery", "clarification"]
 })
 ```
 
 **LLM Execution of Processes:**
 
-**problemAnalysis:**
+**analysis:**
 - Problem: No centralized notification system
 - Users: All users affected
 - Success: In-app + email notifications working
 
-**technicalDiscovery:**
+**discovery:**
 - Architecture: Node.js + React + PostgreSQL
 - Patterns: Service layer, event-driven
 - Integration: Existing auth system
@@ -173,7 +173,7 @@ User: "Break implementation into phases and let me approve each phase."
 ```javascript
 mcp_sessionManager_runSessionIteration({
   project: "/Users/user/projects/myapp",
-  processes: ["codeImplementation"],
+  processes: ["implementation"],
   context: "Phase 1 only: database models and core notification service"
 })
 ```
@@ -249,7 +249,7 @@ class EmailService {
 ```
 
 **Final Quality Assurance:**
-updateSession → planSessionIteration → qualityAssurance
+updateSession → planSessionIteration → validation
 
 **Result:**
 ✅ **Complete Notification System**

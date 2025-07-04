@@ -4,7 +4,6 @@ export type CreateSessionRequest = {
 };
 
 export type CreateSessionResponse = {
-  processes: Record<string, string>; // Available processes from config.yaml with their purposes
   prompt: string; // Algorithm prompt for LLM to start workflow execution
 };
 

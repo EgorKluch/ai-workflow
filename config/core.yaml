@@ -48,9 +48,9 @@ core:
         DECISION TREE:
         1. Unresolved USER_DECISION_REQUIRED blockers in session? → Stop progress, request user decisions for those specific blockers
         2. Unresolved CLARIFY_RESOLVABLE blockers in session? → call clarifySession({context: blocker descriptions})
-        3. No unresolved blockers AND Goal Complete? → execute runSessionIteration({processes: ['qualityAssurance']})
-        4. No unresolved blockers AND information sufficient? → execute runSessionIteration({processes: ['codeImplementation']})
-        5. No unresolved blockers BUT information missing? → execute runSessionIteration({processes: [appropriate analysis processes]})
+        3. No unresolved blockers AND Goal Complete? → execute appropriate final validation processes
+        4. No unresolved blockers AND information sufficient? → execute appropriate implementation processes
+        5. No unresolved blockers BUT information missing? → execute appropriate analysis processes
         
         Available processes: {{AVAILABLE_PROCESSES}}
         

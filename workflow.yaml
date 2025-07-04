@@ -77,21 +77,16 @@ tools:
       
   runSessionIteration:
     purpose: "Execute specified processes and return combined execution prompt"
-    signature: "runSessionIteration({processes: string[], context?: string})"
+    signature: "runSessionIteration({processes: string[]})"
     toolType: "promptReturningTools"
     description: "Loads process definitions from config.yaml and returns unified execution prompt"
     
     inputData:
       processes:
         type: "string[]"
-        description: "Array of process names to execute (e.g., ['problemAnalysis', 'technicalDiscovery'])"
+        description: "Array of process names to execute (e.g., ['analysis', 'discovery'])"
         required: true
         validation: "Process names must exist in config.yaml"
-      context:
-        type: "string"
-        description: "Specific context or focus area for process execution guidance"
-        required: false
-        purpose: "Refines process prompts with targeted context for more precise execution"
     
     outputData:
       success:
@@ -101,26 +96,18 @@ tools:
           algorithmContent:
             - "LLM: Execute all specified processes using their prompts provided by MCP"
             - "LLM: CRITICAL: Follow each process's HOW TO RESPOND format exactly (bullet points, markdown bold, max 5 lines each)"
-            - "LLM: Apply context filtering if context parameter provided"
             - "LLM: IMPORTANT: Each process may call resolveSessionBlockers() if blockers are found during execution"
             - "LLM: If resolveSessionBlockers() was called: follow its instructions immediately, stop process execution"
             - "LLM: If no resolveSessionBlockers() calls: after all processes complete, call updateSession() then planSessionIteration()"
-        context:
-          type: "string"
-          description: "Echo of input context parameter"
-        processes:
-          type: "object"
-          description: "Process definitions loaded from config.yaml"
-          structure: "{ processName: { purpose: string, prompt: string } }"
      
       algorithm:
        - "MCP: Load process definitions from config.yaml for specified process names"
+       - "MCP: Include process requirements as hints for LLM understanding (not filters)"
        - "MCP: Prepare unified execution prompt with process instructions and response requirements"
        - "MCP: Include critical response requirements ensuring HOW TO RESPOND format compliance"
-       - "MCP: Include context guidance if context parameter provided"
        - "MCP: Add resolveSessionBlockers() availability information and conditional execution logic"
        - "MCP: Add fallback updateSession() + planSessionIteration() sequence for no-blocker scenarios"
-       - "MCP: Return structured result with prompt, context, and process definitions"
+       - "MCP: Return structured result with unified prompt containing all process execution guidance"
 
   resolveSessionBlockers:
     purpose: "Analyze encountered blockers, classify them, update session with blockers, and determine resolution strategy"
@@ -232,24 +219,19 @@ tools:
             - "LLM: Execute runSessionIteration with appropriate processes based on user guidance and problem context"
             - "LLM: Evaluate iteration results and determine if uncertainties are resolved"
             - "LLM: If automated resolution fails after user consultation, escalate with explanation of attempted approaches"
-        processes:
-          type: "object"
-          description: "Available processes for selection (from getSessionProcesses)"
-        context:
-          type: "string"
-          description: "Echo of input context parameter"
     
       algorithm:
-        - "MCP: Get available processes via getSessionProcesses()"
+        - "MCP: Get available processes from config.yaml"
         - "MCP: Read clarification prompt template from core.yaml with user consultation guidelines"
-        - "MCP: Combine template with context and available processes"
+        - "MCP: Embed available processes with requirements directly in clarification prompt"
+        - "MCP: Combine template with context and process guidance"
         - "MCP: Return structured result with user consultation and resolution algorithm"
             
   planSessionIteration:
     purpose: "Analyze session state, detect critical blockers, and determine next workflow steps with comprehensive blocker resolution"
     signature: "planSessionIteration()"
     toolType: "promptReturningTools"
-    description: "Strategic planning tool that determines next workflow steps based on session progress and blocker analysis (now works with resolveSessionBlockers for structured blocker handling)"
+    description: "Strategic planning tool that determines next workflow steps based on session progress and blocker analysis, provides all available processes with requirement hints for LLM decision making"
     
     inputData:
       none: "No input parameters - LLM uses session path from context"
@@ -258,25 +240,26 @@ tools:
       success:
         prompt:
           type: "string"
-          description: "Strategic planning algorithm with critical blocker detection for LLM"
+          description: "Strategic planning algorithm with critical blocker detection and available processes for LLM"
+          source: "core.yaml configuration file with process requirements from config.yaml"
           algorithmContent:
             - "LLM: Read session file and parse session goal to determine success criteria"
             - "LLM: Evaluate current progress against goal requirements by analyzing session content" 
             - "LLM: Analyze existing blockers in session file (blockers.needToUserApprove and blockers.needToClarify)"
             - "LLM: If unresolved USER_DECISION_REQUIRED blockers found: stop progress, request user decisions"
             - "LLM: If unresolved CLARIFY_RESOLVABLE blockers found: call clarifySession({context: blocker description})"
-            - "LLM: If session goal fully achieved: execute runSessionIteration({processes: ['qualityAssurance']})"
-            - "LLM: If no blockers and information sufficient: execute runSessionIteration({processes: ['codeImplementation']})"
-            - "LLM: If information missing: execute runSessionIteration({processes: [appropriate analysis processes]})"
-        processes:
-          type: "object"
-          description: "Available processes for strategic selection (from getSessionProcesses)"
+            - "LLM: If session goal fully achieved: execute appropriate final validation processes"
+            - "LLM: If no blockers and information sufficient: execute appropriate implementation processes"
+            - "LLM: If information missing: execute appropriate analysis processes"
+            - "LLM: Use process requirements as hints to determine when each process is recommended"
     
       algorithm:
-       - "MCP: Get available processes via getSessionProcesses()"
+       - "MCP: Get all processes from config.yaml"
+       - "MCP: Include process requirements as 'Recommended when:' hints for each process"
        - "MCP: Prepare strategic planning prompt with session-based blocker analysis logic"
        - "MCP: Include decision tree with blocker resolution paths based on session state"
-       - "MCP: Return structured result with planning algorithm and process options"
+       - "MCP: Embed available processes with requirement hints directly in planning prompt"
+       - "MCP: Return structured result with comprehensive planning algorithm and process guidance"
 
 # === WORKFLOW EXECUTION PATTERN ===
 workflowPattern:
@@ -285,7 +268,7 @@ workflowPattern:
   cyclicalNature:
     description: "Workflow runs in continuous cycles, designed for persistent execution"
     principle: "Each cycle ends with planning next cycle, creating infinite loop until goal achieved"
-    terminationCondition: "Only stops when qualityAssurance process confirms goal completion"
+    terminationCondition: "Stops when final validation processes confirm goal completion"
   
   standardCycle:
     steps:
@@ -299,18 +282,21 @@ workflowPattern:
       withUserBlockers: "runSessionIteration → [process calls resolveSessionBlockers] → user consultation → planSessionIteration"
       withClarifyBlockers: "runSessionIteration → [process calls resolveSessionBlockers] → clarifySession → runSessionIteration"
       mixedBlockers: "runSessionIteration → [process calls resolveSessionBlockers] → user consultation → clarifySession → runSessionIteration"
-      completion: "planSessionIteration → runSessionIteration({processes: ['qualityAssurance']}) → [potential termination]"
+      completion: "planSessionIteration → runSessionIteration({processes: [final validation]}) → [potential termination]"
   
-  keyProcesses:
-    qualityAssurance:
-      role: "Final validation process that can terminate workflow"
-      location: "Must be defined in config.yaml"
+  keyPrinciples:
+    goalAchievement:
+      description: "Final validation processes determine when workflow can terminate"
       trigger: "When planSessionIteration determines goal is achieved"
       
-    codeImplementation:
-      role: "Main implementation process for actual development work"
-      location: "Must be defined in config.yaml"
+    implementation:
+      description: "Main implementation processes for actual development work"
       trigger: "When planSessionIteration determines sufficient information available"
+      
+    processSelection:
+      description: "LLM analyzes session content and uses process requirements as hints for intelligent selection"
+      mechanism: "planSessionIteration provides all processes with 'Recommended when:' guidance"
+      principle: "No automatic filtering - LLM makes intelligent decisions based on session analysis"
 
 # === BLOCKER SYSTEM ===
 blockerSystem:
@@ -368,31 +354,80 @@ blockerSystem:
       structure: "Blockers organized in logical session structure with top-level sections for better classification and management"
       classification: "Session organized by immutable, evolving, consolidatable, expendable sections to guide updateSession processing"
 
+# === REQUIREMENTS SYSTEM ===
+requirementsSystem:
+  purpose: "Process selection guidance system providing intelligent hints for LLM workflow decisions"
+  
+  conceptualFramework:
+    description: "Requirements provide contextual hints for when processes are most effectively applied"
+    principle: "LLM analyzes session content and uses requirements as decision-making guidance, not automatic filters"
+    intelligence: "System relies on LLM's analytical capabilities rather than rigid rule-based automation"
+    
+  implementationApproach:
+    definitionLocation: "Requirements defined in config.yaml processes as optional requirements array"
+    displayMechanism: "planSessionIteration shows requirements as 'Recommended when:' hints for each process"
+    decisionMaking: "LLM evaluates session content against requirement hints to make intelligent process selections"
+    flexibility: "No automatic filtering - LLM can override requirements based on session analysis"
+    
+  requirementTypes:
+    sessionAnalysis: "Questions about session content completeness and structure"
+    dependencies: "Logical prerequisites and workflow ordering guidance"
+    contextual: "Situational factors that influence process effectiveness"
+    
+  exampleRequirements:
+    analysis: "Problem clearly defined in session?"
+    technical: "Technical context and requirements are complete?"
+    planning: "Implementation plan exists in session?"
+    implementation: "No critical blockers present in session?"
+    validation: "Implementation completed and needs verification?"
+    
+  workflowIntegration:
+    planning: "planSessionIteration presents all processes with requirement hints"
+    selection: "LLM analyzes session content to determine which processes best match current needs"
+    execution: "runSessionIteration executes selected processes without requirement filtering"
+    cyclical: "Process selection reevaluated each cycle based on updated session content"
+    
+  benefits:
+    contextualGuidance: "Provides clear guidance for when each process is most valuable"
+    intelligentSelection: "Enables LLM to make informed decisions about workflow progression"
+    flexibility: "Maintains system adaptability while providing structured guidance"
+    transparency: "Makes process selection logic visible and understandable"
+
 # === INTEGRATION REQUIREMENTS ===
 integration:
   purpose: "Requirements for system components integration"
   
   configYaml:
-    requiredProcesses:
-      - "qualityAssurance: Final validation and potential workflow termination"
-      - "codeImplementation: Main development implementation process"
-      - "Additional processes as needed for specific workflow domains"
+    description: "Processes should be defined in config.yaml based on project needs"
+    recommendations:
+      - "Analysis processes for understanding requirements and context"
+      - "Implementation processes for actual development work"
+      - "Validation processes for final quality assurance"
     
     processStructure:
       required: ["purpose", "prompt"]
+      optional: ["requirements"]
       purpose: "Single sentence describing process goal"
-      prompt: "Multi-line execution instructions for LLM"
+      prompt: "Multi-line execution instructions for LLM with structured format"
+      requirements: "Array of conditions when process is recommended (hints for planSessionIteration)"
+      
+    requirementsExamples:
+      - "Problem clearly defined in session?"
+      - "Technical context and requirements are complete?"
+      - "Implementation plan exists in session?"
+      - "No critical blockers present in session?"
   
   coreYaml:
     requiredPrompts:
       - "updateSession: Algorithm for session state updating with critical blocker management, information prioritization, and structural guidance"
       - "clarifySession: Template for uncertainty resolution through user consultation and strategic process execution"
-      - "planSessionIteration: Strategic planning with enhanced critical blocker detection and workflow decision logic"
+      - "planSessionIteration: Strategic planning with enhanced critical blocker detection and workflow decision logic, includes {{AVAILABLE_PROCESSES}} template variable"
       - "runSessionIteration: Template for unified execution with response format compliance requirements"
     
     promptStructure:
       format: "Multi-line algorithmic instructions"
       target: "LLM execution guidance"
+      templateVariables: "{{AVAILABLE_PROCESSES}} for planSessionIteration prompt injection"
       responseFormat: "MUST include HOW TO RESPOND format enforcement for structured output compliance"
       
   sessionFiles:

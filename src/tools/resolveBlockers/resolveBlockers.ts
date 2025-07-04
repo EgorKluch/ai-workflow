@@ -25,7 +25,7 @@ export async function resolveBlockers(session: McpSession, args: ResolveBlockers
     // Load templates from core.yaml
     let coreConfig: CoreConfig;
     try {
-      coreConfig = getCoreConfig<CoreConfig>();
+      coreConfig = getCoreConfig<CoreConfig>(project);
     } catch (coreError) {
       session.logger.addError({
         code: ResolveBlockersErrorCode.CONFIG_LOAD_ERROR,

@@ -71,7 +71,7 @@ Execute specified processes and return combined execution prompt.
 
 **Parameters:**
 - `project` (automatic, string): Absolute path to the project directory (automatically injected by FlowMCP)
-- `processes` (required, array): Array of process names to execute (e.g., ["problemAnalysis", "technicalDiscovery"])
+- `processes` (required, array): Array of process names to execute (e.g., ["analysis", "discovery"])
 - `context` (optional, string): Specific context or focus area for process execution guidance
 
 **Returns:**
@@ -254,15 +254,15 @@ The server implements a cyclical workflow execution pattern with critical blocke
 4. **runSessionIteration**: Execute selected processes (only if no critical blockers)
 5. **updateSession**: Save progress, manage blockers, and update context
 6. **planSessionIteration**: Determine next cycle with re-evaluation of blockers
-7. Repeat until goal achievement (qualityAssurance process confirms completion)
+7. Repeat until goal achievement (final validation processes confirm completion)
 
 **Blocker Integration**: Progress is blocked until critical issues are resolved, preventing wasted implementation effort.
 
 ### Key Processes
 
 The system requires these processes in `config/config.yaml`:
-- **qualityAssurance**: Final validation process that can terminate workflow
-- **codeImplementation**: Main development implementation process
+- **Validation processes**: Final validation processes that can terminate workflow
+- **Implementation processes**: Main development implementation processes
 - Additional domain-specific processes as needed
 
 **Note**: Blocker detection is integrated directly into `planSessionIteration` as the sole blocker detection mechanism, eliminating the need for a separate `blockerAnalysis` process.
@@ -405,13 +405,6 @@ evolving:
       security: "HTTPS enforcement, rate limiting, input sanitization"
       performance: "Sub-200ms authentication response times"
       usability: "Clear error messages and intuitive authentication flows"
-
-  progressState:
-    inProgress: 
-      - "authentication analysis: Reviewing existing auth patterns and security requirements"
-    pending: 
-      - "implementation: Building authentication middleware and user models"
-      - "testing: Manual verification of authentication workflows"
 
   analysisResults: 
     securityAssessment: "Existing system lacks comprehensive authentication - requires full implementation"

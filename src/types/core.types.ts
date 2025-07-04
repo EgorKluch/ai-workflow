@@ -18,8 +18,13 @@ export type CoreTemplates = {
   clarifySessionExtensions: ClarifySessionExtensions;
 };
 
+export type CoreProcess = {
+  purpose: string;
+  prompt: string; // In core.yaml, prompt is a string, not an object
+};
+
 export type CoreProcessesConfig = {
-  processes: Record<string, ProcessConfig>;
+  processes: Record<string, CoreProcess>;
   templates?: CoreTemplates;
 };
 

@@ -3,12 +3,63 @@ import { RunSessionIterationRequest, RunSessionIterationResponse, RunSessionIter
 import { getConfig, getCoreConfig } from '../../utils/getConfig/index.js';
 import { Config } from '../../types/config.types.js';
 import { CoreConfig } from '../../types/core.types.js';
+import { ProcessConfig } from '../../types/processes.types.js';
 import { resolveProjectPath } from '../../utils/pathUtils/index.js';
+
+/**
+ * Converts structured process configuration to formatted prompt string
+ */
+function formatProcessPrompt(processConfig: ProcessConfig, processName: string): string {
+  const { role, text, actions, respond } = processConfig.prompt;
+  
+  let prompt = `${role}\n\n`;
+  
+  // Add session reading instruction
+  prompt += `FIRST: Read the current session file to understand the current state and progress.\n\n`;
+  
+  // Add main prompt content
+  prompt += `${text}\n\n`;
+  
+  // Add actions if present - they are checked after task completion
+  if (actions && actions.length > 0) {
+    prompt += `IMPORTANT: After completing all tasks above, analyze and check these trigger conditions. If any trigger condition is true, execute the corresponding action and finish with that action (do NOT proceed to standard response).\n`;
+    
+    // Group actions by action type
+    const actionsByType = new Map<string, string[]>();
+    actions.forEach(({ trigger, action }) => {
+      if (!actionsByType.has(action)) {
+        actionsByType.set(action, []);
+      }
+      const triggers = actionsByType.get(action);
+      if (triggers) {
+        triggers.push(trigger);
+      }
+    });
+    
+    // Format each action group
+    actionsByType.forEach((triggers, actionType) => {
+      prompt += `${actionType} when:\n`;
+      triggers.forEach(trigger => {
+        prompt += `- ${trigger}\n`;
+      });
+      prompt += '\n';
+    });
+  
+  }
+  
+  // Add progress update requirement
+  prompt += `PROGRESS UPDATE: After completing this process, call updateSession() to save progress.\n\n`;
+  
+  // Add respond
+  prompt += `HOW TO RESPOND: ${respond}`;
+  
+  return prompt;
+}
 
 export async function runSessionIteration(session: McpSession, args: RunSessionIterationRequest): Promise<RunSessionIterationResponse> {
   
   try {
-    const { project: rawProject, processes, context } = args;
+    const { project: rawProject, processes } = args;
     
     // Decode URL-encoded project path (Windows compatibility)
     const project = resolveProjectPath(rawProject);
@@ -20,7 +71,7 @@ export async function runSessionIteration(session: McpSession, args: RunSessionI
         message: 'Project parameter is required',
         context: { arguments: args }
       });
-      return { prompt: '', processes: {} };
+      return { prompt: '' };
     }
 
     if (!processes || !Array.isArray(processes) || processes.length === 0) {
@@ -29,20 +80,20 @@ export async function runSessionIteration(session: McpSession, args: RunSessionI
         message: 'Processes parameter is required and must be a non-empty array',
         context: { arguments: args }
       });
-      return { prompt: '', processes: {} };
+      return { prompt: '' };
     }
 
     // Load process definitions from config.yaml for specified process names
     let configData: Config;
     try {
-      configData = getConfig<Config>();
+      configData = getConfig<Config>(project);
     } catch (configError) {
       session.logger.addError({
         code: RunSessionIterationErrorCode.CONFIG_LOAD_ERROR,
         message: `Failed to load processes configuration: ${configError instanceof Error ? configError.message : String(configError)}`,
         context: { arguments: args, configError }
       });
-      return { prompt: '', processes: {} };
+      return { prompt: '' };
     }
 
     // Validate all processes exist and load their definitions
@@ -56,7 +107,7 @@ export async function runSessionIteration(session: McpSession, args: RunSessionI
       } else {
         processDefinitions[processName] = {
           purpose: processConfig.purpose,
-          prompt: processConfig.prompt
+          prompt: formatProcessPrompt(processConfig, processName)
         };
       }
     }
@@ -72,30 +123,30 @@ export async function runSessionIteration(session: McpSession, args: RunSessionI
           availableProcesses
         }
       });
-      return { prompt: '', processes: {} };
+      return { prompt: '' };
     }
 
-    // Load templates from core.yaml
-    let coreConfig: CoreConfig;
+    // Load core runSessionIteration template from core.yaml
+    let coreConfigData: CoreConfig;
     try {
-      coreConfig = getCoreConfig<CoreConfig>();
+      coreConfigData = getCoreConfig<CoreConfig>(project);
     } catch (coreError) {
       session.logger.addError({
-        code: RunSessionIterationErrorCode.CONFIG_LOAD_ERROR,
-        message: `Failed to load core.yaml: ${coreError instanceof Error ? coreError.message : String(coreError)}`,
+        code: RunSessionIterationErrorCode.CORE_LOAD_ERROR,
+        message: `Failed to load core configuration: ${coreError instanceof Error ? coreError.message : String(coreError)}`,
         context: { arguments: args, coreError }
       });
-      return { prompt: '', processes: {} };
+      return { prompt: '' };
     }
 
-    const templates = coreConfig.core.templates?.runSessionIteration;
+    const templates = coreConfigData.core.templates?.runSessionIteration;
     if (!templates) {
       session.logger.addError({
         code: RunSessionIterationErrorCode.CONFIG_LOAD_ERROR,
         message: 'runSessionIteration templates not found in core.yaml',
         context: { arguments: args }
       });
-      return { prompt: '', processes: {} };
+      return { prompt: '' };
     }
 
     // Prepare unified execution prompt with process instructions
@@ -111,23 +162,12 @@ export async function runSessionIteration(session: McpSession, args: RunSessionI
       unifiedPrompt += processSection + '\n';
     }
 
-    // Include context guidance if context parameter provided
-    if (context) {
-      const contextSection = templates.contextGuidance
-        .replace('{{CONTEXT}}', context);
-      unifiedPrompt += contextSection + '\n\n';
-    }
-
     // Add mandatory completion sequence
     unifiedPrompt += templates.mandatoryCompletion;
 
-    const response: RunSessionIterationResponse = {
-      prompt: unifiedPrompt,
-      context: context,
-      processes: processDefinitions
+    return {
+      prompt: unifiedPrompt
     };
-    
-    return response;
     
   } catch (error) {
     session.logger.addError({
@@ -139,6 +179,6 @@ export async function runSessionIteration(session: McpSession, args: RunSessionI
       }
     });
     
-    return { prompt: '', processes: {} };
+    return { prompt: '' };
   }
 } 

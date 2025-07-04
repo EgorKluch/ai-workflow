@@ -9,18 +9,27 @@ export async function planSessionIteration(
   args: PlanSessionIterationRequest
 ): Promise<PlanSessionIterationResponse> {
   try {
-    // Get available processes via getSessionProcesses equivalent
-    const configData = getConfig<Config>();
-    const processes = Object.keys(configData.config.processes).reduce((result, processName) => {
-      const process = configData.config.processes[processName];
+    // Get project path from args
+    const { project } = args;
+    
+    // Validate project parameter
+    if (!project || typeof project !== 'string') {
+      session.logger.addError({
+        code: 'PLAN_SESSION_ERROR',
+        message: 'Project parameter is required and must be a non-empty string',
+        context: { args }
+      });
       return {
-        ...result,
-        [processName]: process.purpose
+        prompt: ''
       };
-    }, {} as Record<string, string>);
+    }
+
+    // Get all processes from config
+    const configData = getConfig<Config>(project);
+    const allProcesses = configData.config.processes;
 
     // Load planning prompt from core.yaml
-    const coreConfig = getCoreConfig<CoreConfig>();
+    const coreConfig = getCoreConfig<CoreConfig>(project);
     const planProcess = coreConfig.core.processes.planSessionIteration;
     
     if (!planProcess) {
@@ -30,21 +39,31 @@ export async function planSessionIteration(
         context: { args }
       });
       return {
-        prompt: '',
-        processes: {}
+        prompt: ''
       };
     }
 
-    // Replace template variables in the prompt
-    const availableProcessesList = Object.entries(processes)
-      .map(([name, purpose]) => `- ${name}: ${purpose}`)
+    // Format ALL processes with their requirements as hints for LLM
+    const availableProcessesList = Object.entries(allProcesses)
+      .map(([name, processConfig]) => {
+        let processInfo = `- ${name}: ${processConfig.purpose}`;
+        
+        // Add requirements as execution conditions for LLM
+        if (processConfig.requirements && processConfig.requirements.length > 0) {
+          processInfo += `\n  can be executed when:`;
+          processConfig.requirements.forEach(req => {
+            processInfo += `\n    * ${req}`;
+          });
+        }
+        
+        return processInfo;
+      })
       .join('\n');
     
     const prompt = planProcess.prompt.replace('{{AVAILABLE_PROCESSES}}', availableProcessesList);
 
     return {
-      prompt,
-      processes
+      prompt
     };
   } catch (error) {
     session.logger.addError({
@@ -54,8 +73,7 @@ export async function planSessionIteration(
     });
     
     return {
-      prompt: '',
-      processes: {}
+      prompt: ''
     };
   }
 } 

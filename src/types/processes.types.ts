@@ -1,6 +1,15 @@
 export type ProcessConfig = {
   purpose: string;
-  prompt: string;
+  requirements?: string[];
+  prompt: {
+    role: string;
+    text: string;
+    actions?: {
+      trigger: string;
+      action: string;
+    }[];
+    respond: string;
+  };
 };
 
 export type ProcessesConfig = {

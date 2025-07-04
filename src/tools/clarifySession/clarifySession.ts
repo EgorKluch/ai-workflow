@@ -35,7 +35,7 @@ export async function clarifySession(session: McpSession, args: ClarifySessionRe
     // Get available processes via getSessionProcesses equivalent
     let availableProcesses: Record<string, string> = {};
     try {
-      const configData = getConfig<Config>();
+      const configData = getConfig<Config>(project);
       for (const [processName, processConfig] of Object.entries(configData.config.processes)) {
         availableProcesses[processName] = processConfig.purpose;
       }
@@ -51,7 +51,7 @@ export async function clarifySession(session: McpSession, args: ClarifySessionRe
     // Read clarification prompt template from core.yaml
     let coreConfig: CoreConfig;
     try {
-      coreConfig = getCoreConfig<CoreConfig>();
+      coreConfig = getCoreConfig<CoreConfig>(project);
     } catch (coreError) {
       session.logger.addError({
         code: ClarifySessionErrorCode.CORE_LOAD_ERROR,

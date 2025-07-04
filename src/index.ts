@@ -57,7 +57,7 @@ export class SessionManagerMcpServer {
             items: {
               type: 'string'
             },
-            description: 'Array of process names to execute (e.g., ["problemAnalysis", "technicalDiscovery"])'
+            description: 'Array of process names to execute (e.g., ["analysis", "discovery"])'
           },
           context: {
             type: 'string',
@@ -153,7 +153,10 @@ export class SessionManagerMcpServer {
         additionalProperties: false
       }
     }, async (session: McpSession, request: CallToolRequest) => {
-      const args = request.params.arguments as PlanSessionIterationRequest;
+      const args = {
+        project: request.params.arguments?.project as string,
+        ...request.params.arguments
+      } as PlanSessionIterationRequest;
       const result = await planSessionIteration(session, args);
       return session.getResult(result);
     });
